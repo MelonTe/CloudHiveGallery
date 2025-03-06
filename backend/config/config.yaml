@@ -1,0 +1,7 @@
+#数据库配置
+database:
+  user: "root"
+  password: "root"
+  host: "localhost"
+  port: 3306
+  name: "skyhivegallery"
