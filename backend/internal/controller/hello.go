@@ -1,6 +1,11 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"shg/internal/common"
+	"shg/internal/ecode"
+
+	"github.com/gin-gonic/gin"
+)
 
 // HelloWorld godoc
 // @Summary      Say Hello World
@@ -12,7 +17,5 @@ import "github.com/gin-gonic/gin"
 // @Failure      400  {object} map[string]string
 // @Router       /hello [get]
 func HelloWorld(ctx *gin.Context) {
-	ctx.JSON(200, gin.H{
-		"message": "Hello, World!",
-	})
+	common.Error(ctx, ecode.FORBIDDEN_ERROR)
 }
