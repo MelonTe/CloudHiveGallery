@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"shg/internal/common"
-	"shg/internal/ecode"
+	"chg/internal/common"
+	"chg/internal/ecode"
 
 	"github.com/gin-gonic/gin"
 )

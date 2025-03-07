@@ -1,8 +1,8 @@
 package main
 
 import (
-	"shg/cmd"
-	_ "shg/docs"
+	"chg/cmd"
+	_ "chg/docs"
 )
 
 // @title           SkyHiveGallery

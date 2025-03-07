@@ -1,8 +1,8 @@
 package common
 
 import (
+	"chg/internal/ecode"
 	"net/http"
-	"shg/internal/ecode"
 
 	"github.com/gin-gonic/gin"
 )

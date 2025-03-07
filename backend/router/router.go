@@ -2,7 +2,7 @@ package router
 
 //全局路由注册
 import (
-	"shg/router/v1" // 导入 v1 路由
+	"chg/router/v1" // 导入 v1 路由
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

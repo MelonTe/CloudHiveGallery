@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"shg/internal/controller"
+	"chg/internal/controller"
 
 	"github.com/gin-gonic/gin"
 )

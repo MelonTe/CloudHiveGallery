@@ -1,4 +1,4 @@
-module shg
+module chg
 
 go 1.24.1
 
