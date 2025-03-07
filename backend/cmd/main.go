@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	_ "chg/config"
+	"chg/router"
 	_ "fmt"
-	_ "shg/config"
-	"shg/router"
 
 	"github.com/gin-gonic/gin"
 )
