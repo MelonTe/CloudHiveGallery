@@ -15,7 +15,7 @@ import (
 // @Produce      json
 // @Success      200  {object} map[string]string
 // @Failure      400  {object} map[string]string
-// @Router       /hello [get]
+// @Router       /v1/hello [get]
 func HelloWorld(ctx *gin.Context) {
 	common.Error(ctx, ecode.FORBIDDEN_ERROR)
 }

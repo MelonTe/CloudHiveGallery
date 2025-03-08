@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello": {
+        "/v1/hello": {
             "get": {
                 "description": "This is a simple API endpoint that returns a \"Hello, World!\" message.",
                 "consumes": [
@@ -75,7 +75,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "SkyHiveGallery",
 	Description:      "This is a",
