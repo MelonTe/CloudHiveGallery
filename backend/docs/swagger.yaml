@@ -1,4 +1,3 @@
-basePath: /v1
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -16,7 +15,7 @@ info:
   title: SkyHiveGallery
   version: "1.0"
 paths:
-  /hello:
+  /v1/hello:
     get:
       consumes:
       - application/json

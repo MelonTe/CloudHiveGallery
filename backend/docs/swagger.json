@@ -16,9 +16,8 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/v1",
     "paths": {
-        "/hello": {
+        "/v1/hello": {
             "get": {
                 "description": "This is a simple API endpoint that returns a \"Hello, World!\" message.",
                 "consumes": [
