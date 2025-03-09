@@ -2,6 +2,7 @@ package db
 
 import (
 	"chg/config"
+	"chg/internal/model"
 	"fmt"
 	"log"
 
@@ -14,7 +15,7 @@ var db *gorm.DB
 func init() {
 	config := config.LoadConfig()
 	//初始化数据库
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.Database.User,
 		config.Database.Password,
 		config.Database.Port,
@@ -23,6 +24,8 @@ func init() {
 	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
 		log.Fatalf("Failed to connect DB, %s", err)
 	}
+	//自动迁移model
+	model.AutoMigrateUser(db)
 }
 func LoadDB() *gorm.DB {
 	return db
