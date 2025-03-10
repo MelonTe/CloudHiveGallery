@@ -1,3 +1,25 @@
+definitions:
+  common.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+  request.UserRegsiterRequest:
+    properties:
+      checkPassword:
+        type: string
+      userAccount:
+        type: string
+      userPassword:
+        type: string
+    required:
+    - checkPassword
+    - userAccount
+    - userPassword
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -7,37 +29,45 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a
+  description: 云巢画廊接口文档
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: SkyHiveGallery
+  title: CloudHiveGallery
   version: "1.0"
 paths:
-  /v1/hello:
-    get:
+  /v1/user/register:
+    post:
       consumes:
       - application/json
-      description: This is a simple API endpoint that returns a "Hello, World!" message.
+      description: 根据账号密码进行注册
+      parameters:
+      - description: 用户请求注册参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserRegsiterRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 注册成功，返回注册用户的ID
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
         "400":
-          description: Bad Request
+          description: 注册失败，详情见响应中的code
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Say Hello World
+            $ref: '#/definitions/common.Response'
+      summary: 注册用户
       tags:
-      - example
+      - user
 securityDefinitions:
   BasicAuth:
     type: basic

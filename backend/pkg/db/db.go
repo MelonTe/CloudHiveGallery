@@ -2,7 +2,7 @@ package db
 
 import (
 	"chg/config"
-	"chg/internal/model"
+	"chg/internal/model/entity"
 	"fmt"
 	"log"
 
@@ -25,7 +25,7 @@ func init() {
 		log.Fatalf("Failed to connect DB, %s", err)
 	}
 	//自动迁移model
-	model.AutoMigrateUser(db)
+	entity.AutoMigrateUser(db)
 }
 func LoadDB() *gorm.DB {
 	return db

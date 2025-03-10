@@ -1,8 +1,9 @@
-package model
+package entity
 
 import (
 	"time"
 
+	"github.com/sony/sonyflake"
 	"gorm.io/gorm"
 )
 
@@ -26,4 +27,18 @@ func AutoMigrateUser(db *gorm.DB) {
 	if err != nil {
 		panic("⚠️ 用户表迁移失败: " + err.Error())
 	}
+}
+
+var sf = sonyflake.NewSonyflake(sonyflake.Settings{})
+
+// 钩子，使用sonyflake生成ID
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+	if u.ID == 0 {
+		id, err := sf.NextID()
+		if err != nil {
+			return err
+		}
+		u.ID = id
+	}
+	return nil
 }

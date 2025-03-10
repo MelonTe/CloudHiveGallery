@@ -5,9 +5,9 @@ import (
 	_ "chg/docs"
 )
 
-// @title           SkyHiveGallery
+// @title           CloudHiveGallery
 // @version         1.0
-// @description		This is a
+// @description		云巢画廊接口文档
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support

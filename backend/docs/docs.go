@@ -24,9 +24,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/hello": {
-            "get": {
-                "description": "This is a simple API endpoint that returns a \"Hello, World!\" message.",
+        "/v1/user/register": {
+            "post": {
+                "description": "根据账号密码进行注册",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,28 +34,78 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "user"
                 ],
-                "summary": "Say Hello World",
+                "summary": "注册用户",
+                "parameters": [
+                    {
+                        "description": "用户请求注册参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserRegsiterRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "注册成功，返回注册用户的ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "注册失败，详情见响应中的code",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/common.Response"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.UserRegsiterRequest": {
+            "type": "object",
+            "required": [
+                "checkPassword",
+                "userAccount",
+                "userPassword"
+            ],
+            "properties": {
+                "checkPassword": {
+                    "type": "string"
+                },
+                "userAccount": {
+                    "type": "string"
+                },
+                "userPassword": {
+                    "type": "string"
                 }
             }
         }
@@ -77,8 +127,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "SkyHiveGallery",
-	Description:      "This is a",
+	Title:            "CloudHiveGallery",
+	Description:      "云巢画廊接口文档",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

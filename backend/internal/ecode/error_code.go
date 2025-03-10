@@ -1,7 +1,6 @@
 package ecode
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -37,6 +36,12 @@ var errMsgMap = map[int]string{
 	OPERATION_ERROR: "操作失败",
 }
 
+// 错误返回结构体，避免信息重复
+type ErrorWithCode struct {
+	Code int
+	Msg  string
+}
+
 // GetErrMsg 获取错误信息
 func GetErrMsg(code int) string {
 	if msg, ok := errMsgMap[code]; ok {
@@ -45,20 +50,14 @@ func GetErrMsg(code int) string {
 	return "未知错误"
 }
 
-// GetErr 根据状态码创建一个Err
-func GetErr(code int) error {
-	msg, ok := errMsgMap[code]
-	if !ok {
-		msg = "未知错误"
-	}
-	return errors.New(msg)
-}
-
-// GetErrWithDetail 返回带详细信息的错误
-func GetErrWithDetail(code int, msg string) error {
+// GetErrWithDetail 返回带状态码的错误
+func GetErrWithDetail(code int, msg string) *ErrorWithCode {
 	errMsg, ok := errMsgMap[code]
 	if !ok {
 		errMsg = "未知错误"
 	}
-	return fmt.Errorf("%s: %s", errMsg, msg)
+	return &ErrorWithCode{
+		Code: code,
+		Msg:  fmt.Sprintf("%s: %s", errMsg, msg),
+	}
 }
