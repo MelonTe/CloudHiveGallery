@@ -2,6 +2,7 @@ package router
 
 //全局路由注册
 import (
+	"chg/internal/middleware"
 	"chg/router/v1" // 导入 v1 路由
 
 	"github.com/gin-contrib/cors"
@@ -14,6 +15,8 @@ import (
 func SetupRoutes(r *gin.Engine) {
 	//注册swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	//启用session中间件
+	middleware.InitSession(r)
 	//启用 CORS 中间件，允许跨域资源共享
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},                             // 允许的来源（前端地址）

@@ -7,6 +7,16 @@ definitions:
       msg:
         type: string
     type: object
+  request.UserLoginRequest:
+    properties:
+      userAccount:
+        type: string
+      userPassword:
+        type: string
+    required:
+    - userAccount
+    - userPassword
+    type: object
   request.UserRegsiterRequest:
     properties:
       checkPassword:
@@ -19,6 +29,27 @@ definitions:
     - checkPassword
     - userAccount
     - userPassword
+    type: object
+  response.UserLoginVO:
+    properties:
+      createTime:
+        type: string
+      editTime:
+        type: string
+      id:
+        type: integer
+      updateTime:
+        type: string
+      userAccount:
+        type: string
+      userAvatar:
+        type: string
+      userName:
+        type: string
+      userProfile:
+        type: string
+      userRole:
+        type: string
     type: object
 externalDocs:
   description: OpenAPI
@@ -37,6 +68,79 @@ info:
   title: CloudHiveGallery
   version: "1.0"
 paths:
+  /v1/user/get/login:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取用户视图成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserLoginVO'
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取登录的用户信息
+      tags:
+      - user
+  /v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: 根据账号密码进行登录
+      parameters:
+      - description: 用户登录请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功，返回用户视图
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserLoginVO'
+              type: object
+        "400":
+          description: 登录失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 用户登录
+      tags:
+      - user
+  /v1/user/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退出成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 注册失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 执行用户注销（退出）
+      tags:
+      - user
   /v1/user/register:
     post:
       consumes:

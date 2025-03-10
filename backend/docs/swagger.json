@@ -17,6 +17,132 @@
     },
     "host": "localhost:8080",
     "paths": {
+        "/v1/user/get/login": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "获取登录的用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取用户视图成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UserLoginVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/login": {
+            "post": {
+                "description": "根据账号密码进行登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "用户登录请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功，返回用户视图",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UserLoginVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "登录失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/logout": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "执行用户注销（退出）",
+                "responses": {
+                    "200": {
+                        "description": "退出成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "注册失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/register": {
             "post": {
                 "description": "根据账号密码进行注册",
@@ -83,6 +209,21 @@
                 }
             }
         },
+        "request.UserLoginRequest": {
+            "type": "object",
+            "required": [
+                "userAccount",
+                "userPassword"
+            ],
+            "properties": {
+                "userAccount": {
+                    "type": "string"
+                },
+                "userPassword": {
+                    "type": "string"
+                }
+            }
+        },
         "request.UserRegsiterRequest": {
             "type": "object",
             "required": [
@@ -98,6 +239,38 @@
                     "type": "string"
                 },
                 "userPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.UserLoginVO": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string"
+                },
+                "editTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "userAccount": {
+                    "type": "string"
+                },
+                "userAvatar": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userProfile": {
+                    "type": "string"
+                },
+                "userRole": {
                     "type": "string"
                 }
             }
