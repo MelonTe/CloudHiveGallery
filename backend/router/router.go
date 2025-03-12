@@ -3,12 +3,12 @@ package router
 //全局路由注册
 import (
 	"chg/internal/middleware"
-	"chg/router/v1" // 导入 v1 路由
+	v1 "chg/router/v1" // 导入 v1 路由
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // SetupRoutes 全局路由设置

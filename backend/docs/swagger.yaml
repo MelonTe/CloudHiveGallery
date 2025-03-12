@@ -1,13 +1,83 @@
 definitions:
+  common.DeleteRequest:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
+    type: object
   common.Response:
     properties:
       code:
         type: integer
-      data: {}
+      data:
+        type: object
       msg:
         type: string
     type: object
-  request.UserLoginRequest:
+  entity.User:
+    properties:
+      createTime:
+        type: string
+      editTime:
+        type: string
+      id:
+        type: integer
+      updateTime:
+        type: string
+      userAccount:
+        type: string
+      userAvatar:
+        type: string
+      userName:
+        type: string
+      userPassword:
+        type: string
+      userProfile:
+        type: string
+      userRole:
+        type: string
+    type: object
+  user.ListUserVOResponse:
+    properties:
+      current:
+        description: 当前页数
+        type: integer
+      pages:
+        description: 页面大小
+        type: integer
+      records:
+        items:
+          $ref: '#/definitions/user.UserVO'
+        type: array
+      size:
+        description: 页面大小
+        type: integer
+      total:
+        description: 总记录数
+        type: integer
+    type: object
+  user.UserAddRequest:
+    properties:
+      userAccount:
+        description: 用户账号
+        type: string
+      userAvatar:
+        description: 用户头像
+        type: string
+      userName:
+        description: 用户昵称
+        type: string
+      userProfile:
+        description: 用户简介
+        type: string
+      userRole:
+        description: 用户权限
+        type: string
+    required:
+    - userAccount
+    type: object
+  user.UserLoginRequest:
     properties:
       userAccount:
         type: string
@@ -17,7 +87,59 @@ definitions:
     - userAccount
     - userPassword
     type: object
-  request.UserRegsiterRequest:
+  user.UserLoginVO:
+    properties:
+      createTime:
+        type: string
+      editTime:
+        type: string
+      id:
+        example: ""
+        type: string
+      updateTime:
+        type: string
+      userAccount:
+        type: string
+      userAvatar:
+        type: string
+      userName:
+        type: string
+      userProfile:
+        type: string
+      userRole:
+        type: string
+    type: object
+  user.UserQueryRequest:
+    properties:
+      current:
+        description: 当前页数
+        type: integer
+      id:
+        description: 用户ID
+        type: integer
+      pageSize:
+        description: 页面大小
+        type: integer
+      sortField:
+        description: 排序字段
+        type: string
+      sortOrder:
+        description: 排序顺序（默认升序）
+        type: string
+      userAccount:
+        description: 用户账号
+        type: string
+      userName:
+        description: 用户昵称
+        type: string
+      userProfile:
+        description: 用户简介
+        type: string
+      userRole:
+        description: 用户权限
+        type: string
+    type: object
+  user.UserRegsiterRequest:
     properties:
       checkPassword:
         type: string
@@ -30,15 +152,30 @@ definitions:
     - userAccount
     - userPassword
     type: object
-  response.UserLoginVO:
+  user.UserUpdateRequest:
+    properties:
+      id:
+        description: 用户ID
+        type: integer
+      userAvatar:
+        description: 用户头像
+        type: string
+      userName:
+        description: 用户昵称
+        type: string
+      userProfile:
+        description: 用户简介
+        type: string
+      userRole:
+        description: 用户权限
+        type: string
+    type: object
+  user.UserVO:
     properties:
       createTime:
         type: string
-      editTime:
-        type: string
       id:
-        type: integer
-      updateTime:
+        example: ""
         type: string
       userAccount:
         type: string
@@ -68,6 +205,96 @@ info:
   title: CloudHiveGallery
   version: "1.0"
 paths:
+  /v1/user/add:
+    post:
+      consumes:
+      - application/json
+      description: 默认密码为12345678
+      parameters:
+      - description: 用户添加申请参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功，返回添加用户的ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: 添加失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 创建一个用户「管理员」
+      tags:
+      - user
+  /v1/user/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户的ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/common.DeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 删除失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID软删除用户「管理员」
+      tags:
+      - user
+  /v1/user/get:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户的ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功，返回用户的所有信息
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.User'
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID获取用户「管理员」
+      tags:
+      - user
   /v1/user/get/login:
     get:
       produces:
@@ -80,13 +307,63 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/response.UserLoginVO'
+                  $ref: '#/definitions/user.UserLoginVO'
               type: object
         "400":
           description: 获取失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
       summary: 获取登录的用户信息
+      tags:
+      - user
+  /v1/user/get/vo:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户的ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功，返回用户的脱敏信息
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserVO'
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID获取简略信息用户
+      tags:
+      - user
+  /v1/user/list/page/vo:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 需要查询的页数、以及用户关键信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 分页获取一系列用户信息「管理员」
       tags:
       - user
   /v1/user/login:
@@ -100,7 +377,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/request.UserLoginRequest'
+          $ref: '#/definitions/user.UserLoginRequest'
       produces:
       - application/json
       responses:
@@ -111,7 +388,7 @@ paths:
             - $ref: '#/definitions/common.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/response.UserLoginVO'
+                  $ref: '#/definitions/user.UserLoginVO'
               type: object
         "400":
           description: 登录失败，详情见响应中的code
@@ -152,7 +429,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/request.UserRegsiterRequest'
+          $ref: '#/definitions/user.UserRegsiterRequest'
       produces:
       - application/json
       responses:
@@ -170,6 +447,28 @@ paths:
           schema:
             $ref: '#/definitions/common.Response'
       summary: 注册用户
+      tags:
+      - user
+  /v1/user/update:
+    post:
+      consumes:
+      - application/json
+      description: 若用户不存在，则返回失败
+      parameters:
+      - description: 需要更新的用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 更新用户信息「管理员」
       tags:
       - user
 securityDefinitions:
