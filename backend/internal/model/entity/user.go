@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID           uint64         `gorm:"primaryKey;comment:id"`
+	ID           uint64         `gorm:"primaryKey;comment:id" json:"id,string" swaggertype:"string"`
 	UserAccount  string         `gorm:"type:varchar(256);uniqueIndex;not null;comment:账号"`
 	UserPassword string         `gorm:"type:varchar(512);not null;comment:密码"`
 	UserName     string         `gorm:"type:varchar(256);index;comment:用户昵称"`

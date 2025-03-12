@@ -15,10 +15,29 @@
                 <!-- 菜单列 -->
                 <a-menu v-model:selectedKeys="current" mode="horizontal" :items="items" @click="doMenuClick" />
             </a-col>
+            <!-- 用户信息展示 -->
             <a-col flex="120px">
                 <div class="user-login-status">
                     <div v-if="loginUserStore.loginUser.id">
-                        {{ loginUserStore.loginUser.userName ?? '无名' }}
+                        <a-dropdown :trigger="['click']">
+                            <a-space>
+                                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                                {{ loginUserStore.loginUser.userName ?? '无名' }}
+                            </a-space>
+                            <a class="ant-dropdown-link" @click.prevent>
+                                <DownOutlined />
+                            </a>
+                            <!-- 插槽 -->
+                            <template #overlay>
+                                <a-menu>
+                                    <a-menu-item key="0" @click="doLogout">
+                                        <icon-font type="icon-dengchu" />
+                                        退出登录
+                                    </a-menu-item>
+                                </a-menu>
+                            </template>
+                        </a-dropdown>
+
                     </div>
                     <div v-else>
                         <a-button type="primary" href="/user/login">登录</a-button>
@@ -32,13 +51,15 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { computed, h, ref } from 'vue';
 import { MailOutlined, AppstoreOutlined, SettingOutlined, HomeOutlined } from '@ant-design/icons-vue';
-import type { MenuProps } from 'ant-design-vue';
+import { message, type MenuProps } from 'ant-design-vue';
 import { useRouter } from 'vue-router';
 import { useLoginUserStore } from '../stores/useLoginUserStore';
 const loginUserStore = useLoginUserStore()
-const items = ref<MenuProps['items']>([
+
+//未经处理的原始菜单
+const originItmes = [
     {
         key: '/',
         icon: () => h(HomeOutlined),
@@ -46,13 +67,28 @@ const items = ref<MenuProps['items']>([
         title: '主页',
     },
     {
-        key: '/about',
-        icon: () => h(AppstoreOutlined),
-        label: '关于',
-        title: '关于',
+        key: '/admin/userManage',
+        label: '用户管理',
+        title: '用户管理',
     },
-]);
-
+]
+// 根据权限过滤菜单项
+const filterMenus = (menus = [] as MenuProps['items']) => {
+    return menus?.filter((menu) => {
+        // 管理员才能看到 /admin 开头的菜单
+        if (typeof menu?.key === 'string' && menu.key.startsWith('/admin')) {
+            const loginUser = loginUserStore.loginUser
+            if (!loginUser || loginUser.userRole !== 'admin') {
+                return false
+            }
+        }
+        return true
+    })
+}
+//过滤后的菜单
+const items = computed(() => {
+    return filterMenus(originItmes)
+})
 const router = useRouter();
 /* 路由跳转事件 */
 const doMenuClick = ({ key }) => {
@@ -69,6 +105,34 @@ router.afterEach((to, from, next) => {
     /* 把渲染current的值，改成url中的地址，表现为在哪个路由里，menu中的选型标记为选中 */
     current.value = [to.path]
 })
+
+/* 头像下拉菜单 */
+import { DownOutlined } from '@ant-design/icons-vue'
+
+import { createFromIconfontCN } from '@ant-design/icons-vue';
+import { postLogout } from '@/api/user';
+
+/* 项目图标导入 */
+const IconFont = createFromIconfontCN({
+    scriptUrl: '//at.alicdn.com/t/c/font_4855251_hyb7n0qsrh7.js',
+});
+
+/* 注销 */
+const doLogout = async () => {
+    const res = await postLogout()
+    if (res.data.code === 0) {
+        /* 重置未登录 */
+        loginUserStore.setLoginUser({
+            userName: "未登录",
+        })
+        message.success('登出成功')
+        router.push({
+            path: "/user/login",
+        })
+    } else {
+        message.error('登出失败，' + res.data.msg)
+    }
+}
 </script>
 
 <style scoped>

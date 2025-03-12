@@ -8,7 +8,7 @@
                 <router-view></router-view>
             </a-layout-content>
             <a-layout-footer class="footer">
-                SkyHiveGallery made By：MelonTe
+                CloudHiveGallery made By：MelonTe
             </a-layout-footer>
         </a-layout>
     </div>
@@ -30,7 +30,7 @@ import GlobalHeader from '@/components/GlobalHeader.vue';
 
 #basicLayout .content {
     padding: 20px;
-    background: linear-gradient(to right, #fafff8, #ffffff);
+    background: linear-gradient(to right, #fcfcfc, #ffffff);
     margin-bottom: 30px;
 }
 

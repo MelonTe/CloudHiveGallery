@@ -1,10 +1,11 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { getGetLogin } from '@/api/user'
 /**
  * 存储登录用户信息的状态
  */
 export const useLoginUserStore = defineStore('loginUser', () => {
-  const loginUser = ref<any>({
+  const loginUser = ref<API.UserLoginVO>({
     userName: '未登录',
   })
 
@@ -13,12 +14,16 @@ export const useLoginUserStore = defineStore('loginUser', () => {
    */
   async function fetchLoginUser() {
     //todo : 获取登录用户信息
-    //测试，3s之后自动登录(假登入)
-    setTimeout(() => {
+    const res = await getGetLogin()
+    /* 响应码为0并且正常响应 */
+    if (res.data.code === 0 && res.data.data) {
+      loginUser.value = res.data.data
+    }
+    /* setTimeout(() => {
       {
         loginUser.value = { userName: '测试用户', id: 1 }
       }
-    }, 3000)
+    }, 3000) */
   }
 
   /**

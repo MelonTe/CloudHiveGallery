@@ -221,7 +221,7 @@ func DeleteUser(c *gin.Context) {
 // @Produce      json
 // @Param		request body reqUser.UserUpdateRequest true "需要更新的用户信息"
 // @Success      200  {object}  common.Response{data=bool} "更新成功"
-// @Failure      200  {object}  common.Response "更新失败，详情见响应中的code"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
 // @Router       /v1/user/update [POST]
 func UpdateUser(c *gin.Context) {
 	updateReq := reqUser.UserUpdateRequest{}
@@ -246,13 +246,13 @@ func UpdateUser(c *gin.Context) {
 
 // ListUserVOByPage godoc
 // @Summary      分页获取一系列用户信息「管理员」
-// @Description  根据用户关键信息进行模糊查询，注意swagger无法渲染响应的object
+// @Description  根据用户关键信息进行模糊查询
 // @Tags         user
 // @Accept       json
 // @Produce      json
 // @Param		request body reqUser.UserQueryRequest true "需要查询的页数、以及用户关键信息"
 // @Success      200  {object}  common.Response{data=resUser.ListUserVOResponse} "查询成功"
-// @Failure      200  {object}  common.Response "更新失败，详情见响应中的code"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
 // @Router       /v1/user/list/page/vo [POST]
 func ListUserVOByPage(c *gin.Context) {
 	queryReq := reqUser.UserQueryRequest{}
