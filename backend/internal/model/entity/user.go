@@ -1,10 +1,9 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/sony/sonyflake"
 	"gorm.io/gorm"
+	"time"
 )
 
 type User struct {
@@ -18,7 +17,7 @@ type User struct {
 	EditTime     time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP;not null;comment:编辑时间"`
 	CreateTime   time.Time      `gorm:"autoCreateTime;comment:创建时间"`
 	UpdateTime   time.Time      `gorm:"autoUpdateTime;comment:更新时间"`
-	IsDelete     gorm.DeletedAt `gorm:"comment:是否删除"`
+	IsDelete     gorm.DeletedAt `gorm:"comment:是否删除" swaggerignore:"true"`
 }
 
 // AutoMigrateUser 执行数据库迁移

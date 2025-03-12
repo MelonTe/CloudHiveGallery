@@ -11,7 +11,7 @@ import (
 type Response struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Data interface{} `json:"data" swaggertype:"object"`
 }
 
 func BaseResponse(c *gin.Context, data interface{}, msg string, code int) {
