@@ -257,6 +257,7 @@
         },
         "/v1/user/list/page/vo": {
             "post": {
+                "description": "根据用户关键信息进行模糊查询",
                 "consumes": [
                     "application/json"
                 ],
@@ -280,6 +281,24 @@
                 ],
                 "responses": {
                     "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.ListUserVOResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "更新失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
@@ -455,6 +474,24 @@
                 ],
                 "responses": {
                     "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "更新失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
@@ -472,7 +509,8 @@
             ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 }
             }
         },
@@ -500,7 +538,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 },
                 "updateTime": {
                     "type": "string"

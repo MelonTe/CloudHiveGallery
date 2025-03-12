@@ -2,7 +2,8 @@ definitions:
   common.DeleteRequest:
     properties:
       id:
-        type: integer
+        example: ""
+        type: string
     required:
     - id
     type: object
@@ -22,7 +23,8 @@ definitions:
       editTime:
         type: string
       id:
-        type: integer
+        example: ""
+        type: string
       updateTime:
         type: string
       userAccount:
@@ -349,6 +351,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 根据用户关键信息进行模糊查询
       parameters:
       - description: 需要查询的页数、以及用户关键信息
         in: body
@@ -360,6 +363,15 @@ paths:
       - application/json
       responses:
         "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.ListUserVOResponse'
+              type: object
+        "400":
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
@@ -465,6 +477,15 @@ paths:
       - application/json
       responses:
         "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'

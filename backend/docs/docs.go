@@ -264,6 +264,7 @@ const docTemplate = `{
         },
         "/v1/user/list/page/vo": {
             "post": {
+                "description": "根据用户关键信息进行模糊查询",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,6 +288,24 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.ListUserVOResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "更新失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
@@ -462,6 +481,24 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "更新失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
@@ -479,7 +516,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 }
             }
         },
@@ -507,7 +545,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 },
                 "updateTime": {
                     "type": "string"
