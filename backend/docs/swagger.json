@@ -17,6 +17,145 @@
     },
     "host": "localhost:8080",
     "paths": {
+        "/v1/file/test/download": {
+            "get": {
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "测试文件下载接口「管理员」",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件存储在 COS 的 KEY",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回文件流",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "下载失败，详情见响应中的 code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/file/test/upload": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "测试文件上传接口「管理员」",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "响应文件存储在COS的KEY",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/picture/upload": {
+            "post": {
+                "description": "根据是否存在ID来上传图片或者修改图片信息，返回图片信息视图",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "上传图片接口「管理员」",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "图片",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "图片的ID，非必需",
+                        "name": "id",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "上传成功，返回图片信息视图",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/picture.PictureVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/add": {
             "post": {
                 "description": "默认密码为12345678",
@@ -561,6 +700,64 @@
                 },
                 "userRole": {
                     "type": "string"
+                }
+            }
+        },
+        "picture.PictureVO": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "editTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "picFormat": {
+                    "type": "string"
+                },
+                "picHeight": {
+                    "type": "integer"
+                },
+                "picScale": {
+                    "type": "number"
+                },
+                "picSize": {
+                    "type": "integer"
+                },
+                "picWidth": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/user.UserVO"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
