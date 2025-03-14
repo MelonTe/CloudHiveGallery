@@ -15,6 +15,11 @@ type Config struct {
 		Port     int    `mapstructure:"port"`
 		Name     string `mapstructure:"name"`
 	} `mapstructure:"database"`
+	Tcos struct {
+		BucketName string `mapstructure:"bucketName"`
+		Region     string `mapstructure:"region"`
+		Host       string `mapstructure:"host"`
+	}
 }
 
 var config *Config

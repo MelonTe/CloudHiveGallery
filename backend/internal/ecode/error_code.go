@@ -52,12 +52,8 @@ func GetErrMsg(code int) string {
 
 // GetErrWithDetail 返回带状态码的错误
 func GetErrWithDetail(code int, msg string) *ErrorWithCode {
-	errMsg, ok := errMsgMap[code]
-	if !ok {
-		errMsg = "未知错误"
-	}
 	return &ErrorWithCode{
 		Code: code,
-		Msg:  fmt.Sprintf("%s: %s", errMsg, msg),
+		Msg:  fmt.Sprintf("%s", msg),
 	}
 }

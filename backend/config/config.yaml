@@ -5,3 +5,7 @@ database:
   host: "localhost"
   port: 3306
   name: "cloudhivegallery"
+tcos:
+    bucketName: "cloudhivegallery-1348386678"
+    region: "ap-guangzhou"
+    host: "https://cloudhivegallery-1348386678.cos.ap-guangzhou.myqcloud.com"

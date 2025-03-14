@@ -105,7 +105,7 @@ func (s *UserService) GetLoginUser(c *gin.Context) (*entity.User, *ecode.ErrorWi
 	currentUser, ok := session.GetSession(c, consts.USER_LOGIN_STATE).(entity.User)
 	if !ok {
 		//对应的用户不存在
-		return nil, ecode.GetErrWithDetail(ecode.NOT_LOGIN_ERROR, "")
+		return nil, ecode.GetErrWithDetail(ecode.NOT_LOGIN_ERROR, "用户未登录")
 	}
 	//数据库进行ID查询，避免数据不一致。追求性能可以不查询。
 	curUser, err := s.UserRepo.FindById(currentUser.ID)

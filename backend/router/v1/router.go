@@ -27,6 +27,15 @@ func RegisterV1Routes(r *gin.Engine) {
 			userAPI.POST("/add", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.AddUser)
 			userAPI.GET("/get", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.GetUserById)
 		}
+		fileAPI := apiV1.Group("/file")
+		{
+			fileAPI.POST("/test/upload", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.TestUploadFile)
+			fileAPI.GET("/test/download", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.TestDownloadFile)
+		}
+		pictureAPI := apiV1.Group("/picture")
+		{
+			pictureAPI.POST("/upload", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.UploadPicture)
+		}
 	}
 
 }
