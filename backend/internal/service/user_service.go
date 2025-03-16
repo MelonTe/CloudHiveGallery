@@ -120,6 +120,15 @@ func (s *UserService) GetLoginUser(c *gin.Context) (*entity.User, *ecode.ErrorWi
 	return curUser, nil
 }
 
+// 判断当前登录的用户是否是管理员
+func (s *UserService) IsAdmin(c *gin.Context) bool {
+	user, _ := s.GetLoginUser(c)
+	if user != nil && user.UserRole == consts.ADMIN_ROLE {
+		return true
+	}
+	return false
+}
+
 // 用户注销
 func (s *UserService) UserLogout(c *gin.Context) (bool, *ecode.ErrorWithCode) {
 	//从session中提取用户信息
@@ -134,7 +143,7 @@ func (s *UserService) UserLogout(c *gin.Context) (bool, *ecode.ErrorWithCode) {
 }
 
 // 获取一个链式查询对象
-func GetQueryWrapper(db *gorm.DB, req *reqUser.UserQueryRequest) (*gorm.DB, *ecode.ErrorWithCode) {
+func (s *UserService) GetQueryWrapper(db *gorm.DB, req *reqUser.UserQueryRequest) (*gorm.DB, *ecode.ErrorWithCode) {
 	query := db.Session(&gorm.Session{})
 	if req == nil {
 		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数为空")
@@ -191,7 +200,7 @@ func (s *UserService) UpdateUser(u *entity.User) *ecode.ErrorWithCode {
 
 // 获取用户列表
 func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUser.ListUserVOResponse, *ecode.ErrorWithCode) {
-	query, err := GetQueryWrapper(db.LoadDB(), queryReq)
+	query, err := s.GetQueryWrapper(db.LoadDB(), queryReq)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +210,7 @@ func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUs
 		queryReq.Current = 1
 	}
 	//重置query
-	query, _ = GetQueryWrapper(db.LoadDB(), queryReq)
+	query, _ = s.GetQueryWrapper(db.LoadDB(), queryReq)
 	query = query.Offset((queryReq.Current - 1) * queryReq.PageSize).Limit(queryReq.PageSize)
 	users, errr := s.UserRepo.ListUserByPage(query)
 	if errr != nil {
