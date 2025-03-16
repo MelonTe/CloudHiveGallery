@@ -16,6 +16,42 @@ definitions:
       msg:
         type: string
     type: object
+  entity.Picture:
+    properties:
+      category:
+        type: string
+      createTime:
+        type: string
+      editTime:
+        type: string
+      id:
+        example: ""
+        type: string
+      introduction:
+        type: string
+      name:
+        type: string
+      picFormat:
+        type: string
+      picHeight:
+        type: integer
+      picScale:
+        type: number
+      picSize:
+        type: integer
+      picWidth:
+        type: integer
+      tags:
+        description: 存储的格式：["golang","java","c++"]
+        type: string
+      updateTime:
+        type: string
+      url:
+        type: string
+      userId:
+        example: ""
+        type: string
+    type: object
   entity.User:
     properties:
       createTime:
@@ -39,6 +75,132 @@ definitions:
         type: string
       userRole:
         type: string
+    type: object
+  picture.ListPictureResponse:
+    properties:
+      current:
+        description: 当前页数
+        type: integer
+      pages:
+        description: 总页数
+        type: integer
+      records:
+        items:
+          $ref: '#/definitions/entity.Picture'
+        type: array
+      size:
+        description: 页面大小
+        type: integer
+      total:
+        description: 总记录数
+        type: integer
+    type: object
+  picture.ListPictureVOResponse:
+    properties:
+      current:
+        description: 当前页数
+        type: integer
+      pages:
+        description: 总页数
+        type: integer
+      records:
+        items:
+          $ref: '#/definitions/picture.PictureVO'
+        type: array
+      size:
+        description: 页面大小
+        type: integer
+      total:
+        description: 总记录数
+        type: integer
+    type: object
+  picture.PictureEditRequest:
+    properties:
+      category:
+        type: string
+      id:
+        example: ""
+        type: string
+      introduction:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  picture.PictureQueryRequest:
+    properties:
+      category:
+        type: string
+      current:
+        description: 当前页数
+        type: integer
+      id:
+        description: 图片ID
+        example: ""
+        type: string
+      introduction:
+        type: string
+      name:
+        type: string
+      pageSize:
+        description: 页面大小
+        type: integer
+      picFormat:
+        type: string
+      picHeight:
+        type: integer
+      picScale:
+        type: number
+      picSize:
+        type: integer
+      picWidth:
+        type: integer
+      searchText:
+        description: 搜索词
+        type: string
+      sortField:
+        description: 排序字段
+        type: string
+      sortOrder:
+        description: 排序顺序（默认升序）
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      userId:
+        example: ""
+        type: string
+    type: object
+  picture.PictureTagCategory:
+    properties:
+      categoryList:
+        items:
+          type: string
+        type: array
+      tagList:
+        items:
+          type: string
+        type: array
+    type: object
+  picture.PictureUpdateRequest:
+    properties:
+      category:
+        type: string
+      id:
+        example: ""
+        type: string
+      introduction:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
     type: object
   picture.PictureVO:
     properties:
@@ -85,7 +247,7 @@ definitions:
         description: 当前页数
         type: integer
       pages:
-        description: 页面大小
+        description: 总页数
         type: integer
       records:
         items:
@@ -297,6 +459,239 @@ paths:
       summary: 测试文件上传接口「管理员」
       tags:
       - file
+  /v1/picture/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的ID
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/common.DeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 删除失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID软删除图片
+      tags:
+      - picture
+  /v1/picture/edit:
+    post:
+      consumes:
+      - application/json
+      description: 若图片不存在，则返回false
+      parameters:
+      - description: 需要更新的图片信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureEditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 更新图片
+      tags:
+      - picture
+  /v1/picture/get:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Picture'
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID获取图片「管理员」
+      tags:
+      - picture
+  /v1/picture/get/vo:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/picture.PictureVO'
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据ID获取脱敏的图片
+      tags:
+      - picture
+  /v1/picture/list/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 需要查询的页数、以及图片关键信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/picture.ListPictureResponse'
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 分页获取一系列图片信息「管理员」
+      tags:
+      - picture
+  /v1/picture/list/page/vo:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 需要查询的页数、以及图片关键信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/picture.ListPictureVOResponse'
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 分页获取一系列图片信息
+      tags:
+      - picture
+  /v1/picture/tag_category:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/picture.PictureTagCategory'
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取图片的标签和分类（固定）
+      tags:
+      - picture
+  /v1/picture/update:
+    post:
+      consumes:
+      - application/json
+      description: 若图片不存在，则返回false
+      parameters:
+      - description: 需要更新的图片信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 更新图片「管理员」
+      tags:
+      - picture
   /v1/picture/upload:
     post:
       consumes:

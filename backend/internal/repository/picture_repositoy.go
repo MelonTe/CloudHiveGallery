@@ -33,3 +33,20 @@ func (r *PictureRepository) FindById(id uint64) (*entity.Picture, error) {
 func (r *PictureRepository) SavePicture(picture *entity.Picture) error {
 	return r.db.Save(picture).Error
 }
+
+// 删除图片
+func (r *PictureRepository) DeleteById(id uint64) error {
+	err := r.db.Where("id = ?", id).Delete(&entity.Picture{}).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil //无记录
+		}
+		return err
+	}
+	return nil
+}
+
+// 更新图片
+func (r *PictureRepository) UpdateById(id uint64, updateMap map[string]interface{}) error {
+	return r.db.Model(&entity.Picture{ID: id}).Updates(updateMap).Error
+}

@@ -35,6 +35,14 @@ func RegisterV1Routes(r *gin.Engine) {
 		pictureAPI := apiV1.Group("/picture")
 		{
 			pictureAPI.POST("/upload", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.UploadPicture)
+			pictureAPI.POST("/delete", controller.DeletePicture)
+			pictureAPI.POST("/update", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.UpdatePicture)
+			pictureAPI.POST("/edit", controller.UpdatePicture)
+			pictureAPI.GET("/get", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.GetPictureById)
+			pictureAPI.GET("/get/vo", controller.GetPictureVOById)
+			pictureAPI.POST("/list/page", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.ListPictureByPage)
+			pictureAPI.POST("/list/page/vo", controller.ListPictureVOByPage)
+			pictureAPI.GET("/tag_category", controller.ListPictureTagCategory)
 		}
 	}
 
