@@ -319,7 +319,8 @@ definitions:
         type: integer
       id:
         description: 用户ID
-        type: integer
+        example: ""
+        type: string
       pageSize:
         description: 页面大小
         type: integer
@@ -359,7 +360,8 @@ definitions:
     properties:
       id:
         description: 用户ID
-        type: integer
+        example: ""
+        type: string
       userAvatar:
         description: 用户头像
         type: string
@@ -529,7 +531,7 @@ paths:
         in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -558,7 +560,7 @@ paths:
         in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -796,7 +798,7 @@ paths:
         in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -846,7 +848,7 @@ paths:
         in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:

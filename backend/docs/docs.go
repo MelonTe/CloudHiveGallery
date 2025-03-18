@@ -224,7 +224,7 @@ const docTemplate = `{
                 "summary": "根据ID获取图片「管理员」",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "图片的ID",
                         "name": "id",
                         "in": "query",
@@ -273,7 +273,7 @@ const docTemplate = `{
                 "summary": "根据ID获取脱敏的图片",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "图片的ID",
                         "name": "id",
                         "in": "query",
@@ -675,7 +675,7 @@ const docTemplate = `{
                 "summary": "根据ID获取用户「管理员」",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "用户的ID",
                         "name": "id",
                         "in": "query",
@@ -761,7 +761,7 @@ const docTemplate = `{
                 "summary": "根据ID获取简略信息用户",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "用户的ID",
                         "name": "id",
                         "in": "query",
@@ -1511,7 +1511,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "用户ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 },
                 "pageSize": {
                     "description": "页面大小",
@@ -1567,7 +1568,8 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "description": "用户ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": ""
                 },
                 "userAvatar": {
                     "description": "用户头像",

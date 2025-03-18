@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs';
 import type { UnwrapRef } from 'vue';
-import { postListPageVo, postOpenApiDelete } from '@/api/user';
+import { postUserListPageVo, postUserOpenApiDelete } from '@/api/user'
 import { SmileOutlined, DownOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -113,9 +113,9 @@ const pagination = computed(() => {
         showTotal: (total: number) => `共 ${total} 条`,
     }
 })
-//获取数据  
+//获取数据
 const fetchData = async () => {
-    const res = await postListPageVo({
+    const res = await postUserListPageVo({
         ...searchParams
     })
     if (res.data.code === 0 && res.data.data) {
@@ -145,7 +145,7 @@ const doDelete = async (id: string) => {
     if (!id) {
         return
     }
-    const res = await postOpenApiDelete({ id })
+    const res = await postUserOpenApiDelete({id})
     if (res.data.code === 0) {
         message.success('删除成功')
         // 刷新数据

@@ -140,7 +140,7 @@ func AddUser(c *gin.Context) {
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Param		id query int true "用户的ID"
+// @Param		id query string true "用户的ID"
 // @Success      200  {object}  common.Response{data=entity.User} "查询成功，返回用户的所有信息"
 // @Failure      400  {object}  common.Response "查询失败，详情见响应中的code"
 // @Router       /v1/user/get [GET]
@@ -167,7 +167,7 @@ func GetUserById(c *gin.Context) {
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Param		id query int true "用户的ID"
+// @Param		id query string true "用户的ID"
 // @Success      200  {object}  common.Response{data=resUser.UserVO} "查询成功，返回用户的脱敏信息"
 // @Failure      400  {object}  common.Response "查询失败，详情见响应中的code"
 // @Router       /v1/user/get/vo [GET]

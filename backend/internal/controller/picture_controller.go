@@ -110,7 +110,7 @@ func UpdatePicture(c *gin.Context) {
 // @Tags         picture
 // @Accept		json
 // @Produce      json
-// @Param		id query int true "图片的ID"
+// @Param		id query string true "图片的ID"
 // @Success      200  {object}  common.Response{data=entity.Picture} "获取成功"
 // @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
 // @Router       /v1/picture/get [GET]
@@ -133,7 +133,7 @@ func GetPictureById(c *gin.Context) {
 // @Tags         picture
 // @Accept		json
 // @Produce      json
-// @Param		id query int true "图片的ID"
+// @Param		id query string true "图片的ID"
 // @Success      200  {object}  common.Response{data=resPicture.PictureVO} "获取成功"
 // @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
 // @Router       /v1/picture/get/vo [GET]
