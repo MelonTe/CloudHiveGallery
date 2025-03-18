@@ -71,6 +71,16 @@ const originItmes = [
         label: '用户管理',
         title: '用户管理',
     },
+  {
+    key: '/admin/pictureManage',
+    label: '图片管理',
+    title: '图片管理',
+  },
+    {
+        key: '/add_picture',
+        label: '创建图片',
+        title: '创建图片',
+    },
 ]
 // 根据权限过滤菜单项
 const filterMenus = (menus = [] as MenuProps['items']) => {
@@ -110,7 +120,7 @@ router.afterEach((to, from, next) => {
 import { DownOutlined } from '@ant-design/icons-vue'
 
 import { createFromIconfontCN } from '@ant-design/icons-vue';
-import { postLogout } from '@/api/user';
+import { postUserLogout } from '@/api/user';
 
 /* 项目图标导入 */
 const IconFont = createFromIconfontCN({
@@ -119,7 +129,7 @@ const IconFont = createFromIconfontCN({
 
 /* 注销 */
 const doLogout = async () => {
-    const res = await postLogout()
+    const res = await postUserLogout()
     if (res.data.code === 0) {
         /* 重置未登录 */
         loginUserStore.setLoginUser({

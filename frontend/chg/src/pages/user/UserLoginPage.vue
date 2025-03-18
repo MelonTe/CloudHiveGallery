@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { postLogin } from '@/api/user';
+import { postUserLogin, postUserLogout } from '@/api/user'
 import router from '@/router';
 import { useLoginUserStore } from '@/stores/useLoginUserStore';
 import { message } from 'ant-design-vue';
@@ -48,7 +48,7 @@ const formState = reactive<API.UserLoginRequest>({
 /* 提交表单 */
 const handleSubmit = async (values: any) => {
     /* 传入表单项 */
-    const res = await postLogin(values)
+    const res = await postUserLogin(values);
     if (res.data.code === 0 && res.data.data) {
         /* 把登录态保存到全局状态中 */
         await loginUserStore.fetchLoginUser()

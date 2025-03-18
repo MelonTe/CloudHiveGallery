@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { getGetLogin } from '@/api/user'
+import { getUserGetLogin } from '@/api/user'
 /**
  * 存储登录用户信息的状态
  */
@@ -14,7 +14,7 @@ export const useLoginUserStore = defineStore('loginUser', () => {
    */
   async function fetchLoginUser() {
     //todo : 获取登录用户信息
-    const res = await getGetLogin()
+    const res = await getUserGetLogin()
     /* 响应码为0并且正常响应 */
     if (res.data.code === 0 && res.data.data) {
       loginUser.value = res.data.data
