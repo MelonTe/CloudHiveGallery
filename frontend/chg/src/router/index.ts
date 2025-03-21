@@ -53,7 +53,7 @@ const router = createRouter({
       path: '/picture/:id',
       name: '图片详情',
       component: PictureDetailPage,
-      props: ture,
+      props: true,
     },
   ],
 })
