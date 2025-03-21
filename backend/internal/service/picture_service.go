@@ -12,10 +12,12 @@ import (
 	"chg/pkg/db"
 	"encoding/json"
 	"fmt"
-	"gorm.io/gorm"
 	"log"
 	"mime/multipart"
 	"time"
+	"unicode/utf8"
+
+	"gorm.io/gorm"
 )
 
 type PictureService struct {
@@ -179,7 +181,9 @@ func (s *PictureService) ValidPicture(Picture *entity.Picture) *ecode.ErrorWithC
 	if len(Picture.Introduction) > 800 {
 		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "图片简介过长")
 	}
-	if Picture.Name == "" || len(Picture.Name) > 20 {
+	if Picture.Name == "" || utf8.RuneCountInString(Picture.Name) > 20 {
+		fmt.Println(Picture.Name)
+		fmt.Println(len(Picture.Name))
 		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "图片名不能为空或不能超过20个字符")
 	}
 	return nil
