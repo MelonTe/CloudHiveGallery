@@ -15,6 +15,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand/v2"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -398,7 +399,9 @@ func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBat
 	//2.抓取内容
 	//searchText需要编码，否则无法抓取中文
 	encodedSearchText := url.QueryEscape(req.SearchText)
-	fetchUrl := fmt.Sprintf("https://cn.bing.com/images/async?q=%s&mmasync=1", encodedSearchText)
+	//设置一定的页面偏移量
+	randInt := rand.IntN(100)
+	fetchUrl := fmt.Sprintf("https://cn.bing.com/images/async?q=%s&mmasync=1&first=%d", encodedSearchText, randInt)
 	//创建链接
 	res, err := http.Get(fetchUrl)
 	if err != nil {
