@@ -40,14 +40,18 @@
       <template #renderItem="{ item: picture }">
         <a-list-item style="padding: 0">
           <!-- 单张图片 -->
-          <a-card hoverable @click="doClickPicture(picture)" class="custom-card" style="height: 240px">
+          <a-card
+            hoverable
+            @click="doClickPicture(picture)"
+            class="custom-card"
+            style="height: 270px"
+          >
             <template #cover>
               <div class="cover-container">
                 <img :alt="picture.name" :src="picture.url" class="cover-image" />
-                <div class="image-name">{{ picture.name }}</div>
               </div>
             </template>
-            <a-card-meta>
+            <a-card-meta :title="picture.name">
               <template #description>
                 <a-flex wrap="wrap">
                   <a-tag color="green">{{ picture.category || '默认' }}</a-tag>
@@ -78,7 +82,6 @@ const doClickPicture = (picture) => {
     path: `/picture/${picture.id}`,
   })
 }
-
 
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
@@ -124,11 +127,10 @@ const fetchData = async () => {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
   } else {
-    message.error('获取数据失败，' + res.data.message)
+    message.error('获取数据失败，' + res.data.msg)
   }
   loading.value = false
 }
-
 
 // 页面加载时请求一次
 onMounted(() => {
@@ -164,22 +166,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-#homePage{
+#homePage {
   margin-bottom: 16px;
 }
 #homePage .search-bar {
   max-width: 480px;
   margin: 0 auto 16px;
 }
-#homePage .tag-bar{
+#homePage .tag-bar {
   margin-bottom: 16px;
 }
 
-   /* 卡片整体美化 */
- .custom-card {
-   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-   border-radius: 8px;
- }
+/* 卡片整体美化 */
+.custom-card {
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+  border-radius: 8px;
+}
 
 .custom-card:hover {
   transform: translateY(-5px); /* 轻微浮起 */

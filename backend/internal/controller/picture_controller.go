@@ -247,7 +247,7 @@ func ListPictureVOByPage(c *gin.Context) {
 	c.ShouldBind(&queryReq)
 	//限制爬虫
 	if queryReq.PageSize > 20 {
-		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
+		common.BaseResponse(c, nil, "最多只允许获取20张/页", ecode.PARAMS_ERROR)
 		return
 	}
 	//普通用户默认只允许查询过审图片

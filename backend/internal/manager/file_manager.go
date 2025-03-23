@@ -152,9 +152,11 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 	if errr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片信息失败")
 	}
+	//picName去除后缀，作为图片昵称
+	picNameNoType := picName[:strings.LastIndex(picName, ".")]
 	return &file.UploadPictureResult{
 		URL:       config.LoadConfig().Tcos.Host + "/" + uploadPath,
-		PicName:   picName,
+		PicName:   picNameNoType,
 		PicSize:   picInfo.Size,
 		PicWidth:  picInfo.Width,
 		PicHeight: picInfo.Height,
