@@ -169,6 +169,21 @@ export async function postPictureUpload(
   })
 }
 
+/** 批量抓取图片「管理员」 POST /v1/picture/upload/batch */
+export async function postPictureUploadBatch(
+  body: API.PictureUploadByBatchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: number }>('/v1/picture/upload/batch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 根据URL上传图片接口「需要登录校验」 POST /v1/picture/upload/url */
 export async function postPictureUploadUrl(
   body: API.PictureUploadRequest,

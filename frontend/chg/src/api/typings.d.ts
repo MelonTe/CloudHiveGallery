@@ -148,11 +148,22 @@ declare namespace API {
     tags?: string[]
   }
 
+  type PictureUploadByBatchRequest = {
+    /** 图片数量 */
+    count?: number
+    /** 图片名称前缀，默认为SearchText */
+    namePrefix?: string
+    /** 搜索词 */
+    searchText?: string
+  }
+
   type PictureUploadRequest = {
     /** 图片地址 */
     fileUrl?: string
     /** 图片ID */
     id?: string
+    /** 图片名称 */
+    picName?: string
   }
 
   type PictureVO = {

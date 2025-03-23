@@ -1,5 +1,15 @@
 <template>
   <div id="pictureManagePage">
+    <a-flex justify="space-between">
+      <h2>图片管理</h2>
+      <a-space>
+        <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
+        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
+          >+ 批量创建图片</a-button
+        >
+      </a-space>
+    </a-flex>
+  <div style="margin-bottom: 16px"></div>
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="关键词" name="searchText">
@@ -101,10 +111,19 @@
 </template>
 <script lang="ts" setup>
 import dayjs from 'dayjs'
-import { postPictureListPage, postPictureListPageVo, postPictureOpenApiDelete, postPictureReview } from '@/api/picture'
+import {
+  postPictureListPage,
+  postPictureListPageVo,
+  postPictureOpenApiDelete,
+  postPictureReview,
+} from '@/api/picture'
 import { message } from 'ant-design-vue'
 import { computed, onMounted, reactive, ref } from 'vue'
-import { PIC_REVIEW_STATUS_MAP, PIC_REVIEW_STATUS_ENUM, PIC_REVIEW_STATUS_OPTIONS } from '../../constants/picture.ts'
+import {
+  PIC_REVIEW_STATUS_MAP,
+  PIC_REVIEW_STATUS_ENUM,
+  PIC_REVIEW_STATUS_OPTIONS,
+} from '../../constants/picture.ts'
 const columns = [
   {
     title: 'id',
@@ -228,7 +247,8 @@ const doDelete = async (id: string) => {
 }
 //审核函数
 const handleReview = async (record: API.Picture, reviewStatus: number) => {
-  const reviewMessage = reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝'
+  const reviewMessage =
+    reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝'
   const res = await postPictureReview({
     id: record.id,
     reviewStatus,
@@ -242,5 +262,4 @@ const handleReview = async (record: API.Picture, reviewStatus: number) => {
     message.error('审核操作失败，' + res.data.msg)
   }
 }
-
 </script>

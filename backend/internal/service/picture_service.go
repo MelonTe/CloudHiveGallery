@@ -396,7 +396,7 @@ func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBat
 		req.NamePrefix = req.SearchText
 	}
 	//2.抓取内容
-	//searchText需要编码
+	//searchText需要编码，否则无法抓取中文
 	encodedSearchText := url.QueryEscape(req.SearchText)
 	fetchUrl := fmt.Sprintf("https://cn.bing.com/images/async?q=%s&mmasync=1", encodedSearchText)
 	//创建链接
