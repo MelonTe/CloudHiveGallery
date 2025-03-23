@@ -92,6 +92,21 @@ export async function postPictureListPageVo(
   })
 }
 
+/** 执行图片审核「管理员」 POST /v1/picture/review */
+export async function postPictureReview(
+  body: API.PictureReviewRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: boolean }>('/v1/picture/review', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 获取图片的标签和分类（固定） GET /v1/picture/tag_category */
 export async function getPictureTagCategory(options?: { [key: string]: any }) {
   return request<API.Response & { data?: API.PictureTagCategory }>('/v1/picture/tag_category', {
@@ -100,7 +115,7 @@ export async function getPictureTagCategory(options?: { [key: string]: any }) {
   })
 }
 
-/** 更新图片「管理员」 若图片不存在，则返回false POST /v1/picture/update */
+/** 更新图片 若图片不存在，则返回false POST /v1/picture/update */
 export async function postPictureUpdate(
   body: API.PictureUpdateRequest,
   options?: { [key: string]: any }
@@ -115,7 +130,7 @@ export async function postPictureUpdate(
   })
 }
 
-/** 上传图片接口「管理员」 根据是否存在ID来上传图片或者修改图片信息，返回图片信息视图 POST /v1/picture/upload */
+/** 上传图片接口「需要登录校验」 根据是否存在ID来上传图片或者修改图片信息，返回图片信息视图 POST /v1/picture/upload */
 export async function postPictureUpload(
   body: {
     /** 图片的ID，非必需 */
@@ -150,6 +165,21 @@ export async function postPictureUpload(
     method: 'POST',
     data: formData,
     requestType: 'form',
+    ...(options || {}),
+  })
+}
+
+/** 根据URL上传图片接口「需要登录校验」 POST /v1/picture/upload/url */
+export async function postPictureUploadUrl(
+  body: API.PictureUploadRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.PictureVO }>('/v1/picture/upload/url', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   })
 }

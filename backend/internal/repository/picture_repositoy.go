@@ -46,7 +46,7 @@ func (r *PictureRepository) DeleteById(id uint64) error {
 	return nil
 }
 
-// 更新图片
+// 通过map更新图片，只更新map中含有的字段
 func (r *PictureRepository) UpdateById(id uint64, updateMap map[string]interface{}) error {
 	return r.db.Model(&entity.Picture{ID: id}).Updates(updateMap).Error
 }

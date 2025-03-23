@@ -36,3 +36,19 @@ func AuthCheck(userService *service.UserService, mustRole string) gin.HandlerFun
 		c.Next()
 	}
 }
+
+// 登录校验中间件，只有登录的用户才允许执行接下来的服务
+func LoginCheck(userService *service.UserService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		//获取当前登录对象
+		_, err := userService.GetLoginUser(c)
+		if err != nil {
+			//未登录或者出错
+			common.BaseResponse(c, nil, err.Msg, err.Code)
+			c.Abort()
+			return
+		}
+		//放行
+		c.Next()
+	}
+}

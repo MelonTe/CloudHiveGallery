@@ -2,11 +2,13 @@ package controller
 
 import (
 	"chg/internal/common"
+	"chg/internal/consts"
 	"chg/internal/ecode"
 	reqPicture "chg/internal/model/request/picture"
 	resPicture "chg/internal/model/response/picture"
 	"chg/internal/service"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ func init() {
 }
 
 // UploadPicture godoc
-// @Summary      上传图片接口「管理员」
+// @Summary      上传图片接口「需要登录校验」
 // @Description  根据是否存在ID来上传图片或者修改图片信息，返回图片信息视图
 // @Tags         picture
 // @Accept       mpfd
@@ -35,14 +37,68 @@ func UploadPicture(c *gin.Context) {
 	file, _ := c.FormFile("file")
 	picReq := &reqPicture.PictureUploadRequest{}
 	c.ShouldBind(picReq)
-	//因为存在中间件，所以一定会成功获取
-	loginUser, _ := sUser.GetLoginUser(c)
+	loginUser, err := sUser.GetLoginUser(c)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
 	picVO, err := sPicture.UploadPicture(file, picReq, loginUser)
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
 	common.Success(c, *picVO)
+}
+
+// UploadPictureByUrl godoc
+// @Summary      根据URL上传图片接口「需要登录校验」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param        request body reqPicture.PictureUploadRequest true "图片URL"
+// @Success      200  {object}  common.Response{data=resPicture.PictureVO} "上传成功，返回图片信息视图"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/picture/upload/url [POST]
+func UploadPictureByUrl(c *gin.Context) {
+	picReq := &reqPicture.PictureUploadRequest{}
+	c.ShouldBind(picReq)
+	loginUser, err := sUser.GetLoginUser(c)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	//若picUrl包含了?解析参数，需要去掉
+	if idx := strings.LastIndex(picReq.FileUrl, "?"); idx != -1 {
+		picReq.FileUrl = picReq.FileUrl[:idx]
+	}
+	picVO, err := sPicture.UploadPicture(picReq.FileUrl, picReq, loginUser)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, *picVO)
+}
+
+// UploadPictureByBatch godoc
+// @Summary      批量抓取图片「管理员」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param        request body reqPicture.PictureUploadByBatchRequest true "图片的关键词"
+// @Success      200  {object}  common.Response{data=int} "返回抓取图片数量"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/picture/upload/batch [POST]
+func UploadPictureByBatch(c *gin.Context) {
+	picReq := &reqPicture.PictureUploadByBatchRequest{}
+	c.ShouldBind(picReq)
+	//一定能获取
+	loginUser, _ := sUser.GetLoginUser(c)
+	cnt, err := sPicture.UploadPictureByBatch(picReq, loginUser)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, cnt)
 }
 
 // DeletePicture godoc
@@ -81,7 +137,7 @@ func DeletePicture(c *gin.Context) {
 }
 
 // UpdatePicture godoc
-// @Summary      更新图片「管理员」
+// @Summary      更新图片
 // @Description  若图片不存在，则返回false
 // @Tags         picture
 // @Accept       json
@@ -97,8 +153,10 @@ func UpdatePicture(c *gin.Context) {
 		common.BaseResponse(c, false, "参数错误", ecode.PARAMS_ERROR)
 		return
 	}
+	//获取登录用户，使用中间件保证可以获取到用户
+	loginUser, _ := sUser.GetLoginUser(c)
 	//更新操作，参数校验等在service层完成
-	if err := sPicture.UpdatePicture(&updateReq); err != nil {
+	if err := sPicture.UpdatePicture(&updateReq, loginUser); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return
 	}
@@ -163,6 +221,8 @@ func GetPictureVOById(c *gin.Context) {
 // @Router       /v1/picture/list/page [POST]
 func ListPictureByPage(c *gin.Context) {
 	queryReq := reqPicture.PictureQueryRequest{}
+	//管理员可以查看所有图片
+	queryReq.ReviewStatus = consts.ALL
 	c.ShouldBind(&queryReq)
 	//获取分页查询对象
 	pics, err := sPicture.ListPictureByPage(&queryReq)
@@ -190,6 +250,8 @@ func ListPictureVOByPage(c *gin.Context) {
 		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
 		return
 	}
+	//普通用户默认只允许查询过审图片
+	queryReq.ReviewStatus = consts.PASS
 	//获取分页查询对象
 	pics, err := sPicture.ListPictureVOByPage(&queryReq)
 	if err != nil {
@@ -210,6 +272,7 @@ func ListPictureVOByPage(c *gin.Context) {
 // @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
 // @Router       /v1/picture/edit [POST]
 func EditPicture(c *gin.Context) {
+	//update和edit复用了同一个请求
 	updateReq := reqPicture.PictureUpdateRequest{}
 	c.ShouldBind(&updateReq)
 	if updateReq.ID <= 0 {
@@ -223,7 +286,7 @@ func EditPicture(c *gin.Context) {
 		return
 	}
 	//更新操作，参数校验等在service层完成
-	if err := sPicture.UpdatePicture(&updateReq); err != nil {
+	if err := sPicture.UpdatePicture(&updateReq, user); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return
 	}
@@ -244,4 +307,25 @@ func ListPictureTagCategory(c *gin.Context) {
 		CategoryList: []string{"模板", "电商", "表情包", "素材", "海报"},
 	}
 	common.Success(c, tagCate)
+}
+
+// DoPictureReview godoc
+// @Summary      执行图片审核「管理员」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.PictureReviewRequest true "审核图片所需信息"
+// @Success      200  {object}  common.Response{data=bool} "审核更新成功"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/picture/review [POST]
+func DoPictureReview(c *gin.Context) {
+	var req reqPicture.PictureReviewRequest
+	c.ShouldBind(&req)
+	//获取当前登录用户
+	user, _ := sUser.GetLoginUser(c)
+	if err := sPicture.DoPictureReview(&req, user); err != nil {
+		common.BaseResponse(c, false, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, true)
 }

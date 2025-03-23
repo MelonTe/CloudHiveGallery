@@ -76,6 +76,10 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    reviewMessage?: string
+    reviewStatus?: number
+    reviewTime?: string
+    reviewerId?: string
     /** 存储的格式：["golang","java","c++"] */
     tags?: string
     updateTime?: string
@@ -106,6 +110,11 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    reviewMessage?: string
+    /** 新增审核字段 */
+    reviewStatus?: string
+    /** 审核人ID */
+    reviewerId?: string
     /** 搜索词 */
     searchText?: string
     /** 排序字段 */
@@ -113,7 +122,17 @@ declare namespace API {
     /** 排序顺序（默认升序） */
     sortOrder?: string
     tags?: string[]
+    /** 图片上传人信息 */
     userId?: string
+  }
+
+  type PictureReviewRequest = {
+    /** 图片ID */
+    id?: string
+    /** 审核信息 */
+    reviewMessage?: string
+    /** 审核状态 */
+    reviewStatus?: string
   }
 
   type PictureTagCategory = {
@@ -127,6 +146,13 @@ declare namespace API {
     introduction?: string
     name?: string
     tags?: string[]
+  }
+
+  type PictureUploadRequest = {
+    /** 图片地址 */
+    fileUrl?: string
+    /** 图片ID */
+    id?: string
   }
 
   type PictureVO = {

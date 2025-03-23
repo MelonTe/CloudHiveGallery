@@ -410,6 +410,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/picture/review": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "执行图片审核「管理员」",
+                "parameters": [
+                    {
+                        "description": "审核图片所需信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/picture/tag_category": {
             "get": {
                 "consumes": [
@@ -462,7 +513,7 @@ const docTemplate = `{
                 "tags": [
                     "picture"
                 ],
-                "summary": "更新图片「管理员」",
+                "summary": "更新图片",
                 "parameters": [
                     {
                         "description": "需要更新的图片信息",
@@ -514,7 +565,7 @@ const docTemplate = `{
                 "tags": [
                     "picture"
                 ],
-                "summary": "上传图片接口「管理员」",
+                "summary": "上传图片接口「需要登录校验」",
                 "parameters": [
                     {
                         "type": "file",
@@ -528,6 +579,108 @@ const docTemplate = `{
                         "description": "图片的ID，非必需",
                         "name": "id",
                         "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "上传成功，返回图片信息视图",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/picture.PictureVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/picture/upload/batch": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "批量抓取图片「管理员」",
+                "parameters": [
+                    {
+                        "description": "图片的关键词",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureUploadByBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回抓取图片数量",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/picture/upload/url": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "根据URL上传图片接口「需要登录校验」",
+                "parameters": [
+                    {
+                        "description": "图片URL",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureUploadRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1106,6 +1259,19 @@ const docTemplate = `{
                 "picWidth": {
                     "type": "integer"
                 },
+                "reviewMessage": {
+                    "type": "string"
+                },
+                "reviewStatus": {
+                    "type": "integer"
+                },
+                "reviewTime": {
+                    "type": "string"
+                },
+                "reviewerId": {
+                    "type": "string",
+                    "example": ""
+                },
                 "tags": {
                     "description": "存储的格式：[\"golang\",\"java\",\"c++\"]",
                     "type": "string"
@@ -1276,6 +1442,19 @@ const docTemplate = `{
                 "picWidth": {
                     "type": "integer"
                 },
+                "reviewMessage": {
+                    "type": "string"
+                },
+                "reviewStatus": {
+                    "description": "新增审核字段",
+                    "type": "string",
+                    "example": ""
+                },
+                "reviewerId": {
+                    "description": "审核人ID",
+                    "type": "string",
+                    "example": ""
+                },
                 "searchText": {
                     "description": "搜索词",
                     "type": "string"
@@ -1295,6 +1474,26 @@ const docTemplate = `{
                     }
                 },
                 "userId": {
+                    "description": "图片上传人信息",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "picture.PictureReviewRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "图片ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "reviewMessage": {
+                    "description": "审核信息",
+                    "type": "string"
+                },
+                "reviewStatus": {
+                    "description": "审核状态",
                     "type": "string",
                     "example": ""
                 }
@@ -1338,6 +1537,41 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "picture.PictureUploadByBatchRequest": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "图片数量",
+                    "type": "integer"
+                },
+                "namePrefix": {
+                    "description": "图片名称前缀，默认为SearchText",
+                    "type": "string"
+                },
+                "searchText": {
+                    "description": "搜索词",
+                    "type": "string"
+                }
+            }
+        },
+        "picture.PictureUploadRequest": {
+            "type": "object",
+            "properties": {
+                "fileUrl": {
+                    "description": "图片地址",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "图片ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "picName": {
+                    "description": "图片名称",
+                    "type": "string"
                 }
             }
         },
