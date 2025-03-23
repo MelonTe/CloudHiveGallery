@@ -41,6 +41,15 @@ definitions:
         type: integer
       picWidth:
         type: integer
+      reviewMessage:
+        type: string
+      reviewStatus:
+        type: integer
+      reviewTime:
+        type: string
+      reviewerId:
+        example: ""
+        type: string
       tags:
         description: 存储的格式：["golang","java","c++"]
         type: string
@@ -158,6 +167,16 @@ definitions:
         type: integer
       picWidth:
         type: integer
+      reviewMessage:
+        type: string
+      reviewStatus:
+        description: 新增审核字段
+        example: ""
+        type: string
+      reviewerId:
+        description: 审核人ID
+        example: ""
+        type: string
       searchText:
         description: 搜索词
         type: string
@@ -172,6 +191,21 @@ definitions:
           type: string
         type: array
       userId:
+        description: 图片上传人信息
+        example: ""
+        type: string
+    type: object
+  picture.PictureReviewRequest:
+    properties:
+      id:
+        description: 图片ID
+        example: ""
+        type: string
+      reviewMessage:
+        description: 审核信息
+        type: string
+      reviewStatus:
+        description: 审核状态
         example: ""
         type: string
     type: object
@@ -201,6 +235,31 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  picture.PictureUploadByBatchRequest:
+    properties:
+      count:
+        description: 图片数量
+        type: integer
+      namePrefix:
+        description: 图片名称前缀，默认为SearchText
+        type: string
+      searchText:
+        description: 搜索词
+        type: string
+    type: object
+  picture.PictureUploadRequest:
+    properties:
+      fileUrl:
+        description: 图片地址
+        type: string
+      id:
+        description: 图片ID
+        example: ""
+        type: string
+      picName:
+        description: 图片名称
+        type: string
     type: object
   picture.PictureVO:
     properties:
@@ -640,6 +699,36 @@ paths:
       summary: 分页获取一系列图片信息
       tags:
       - picture
+  /v1/picture/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 审核图片所需信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审核更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 执行图片审核「管理员」
+      tags:
+      - picture
   /v1/picture/tag_category:
     get:
       consumes:
@@ -691,7 +780,7 @@ paths:
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 更新图片「管理员」
+      summary: 更新图片
       tags:
       - picture
   /v1/picture/upload:
@@ -725,7 +814,67 @@ paths:
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 上传图片接口「管理员」
+      summary: 上传图片接口「需要登录校验」
+      tags:
+      - picture
+  /v1/picture/upload/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的关键词
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureUploadByBatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回抓取图片数量
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: integer
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 批量抓取图片「管理员」
+      tags:
+      - picture
+  /v1/picture/upload/url:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片URL
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureUploadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功，返回图片信息视图
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/picture.PictureVO'
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据URL上传图片接口「需要登录校验」
       tags:
       - picture
   /v1/user/add:

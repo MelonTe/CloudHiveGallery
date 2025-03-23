@@ -13,7 +13,11 @@ type PictureQueryRequest struct {
 	PicHeight    int      `json:"picHeight"`
 	PicScale     float64  `json:"picScale"`
 	PicFormat    string   `json:"picFormat"`
-	UserID       uint64   `json:"userId,string" swaggertype:"string"`
-	SearchText   string   `json:"searchText"` //搜索词
+	UserID       uint64   `json:"userId,string" swaggertype:"string"` //图片上传人信息
+	SearchText   string   `json:"searchText"`                         //搜索词
 	common.PageRequest
+	//新增审核字段
+	ReviewStatus  int    `json:"reviewStatus,string" swaggertype:"string"` //审核状态
+	ReviewerID    uint64 `json:"reviewerId,string" swaggertype:"string"`   //审核人ID
+	ReviewMessage string `json:"reviewMessage"`
 }

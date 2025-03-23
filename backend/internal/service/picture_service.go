@@ -2,8 +2,10 @@ package service
 
 import (
 	"chg/internal/common"
+	"chg/internal/consts"
 	"chg/internal/ecode"
 	"chg/internal/manager"
+	"chg/internal/model/dto/file"
 	"chg/internal/model/entity"
 	reqPicture "chg/internal/model/request/picture"
 	resPicture "chg/internal/model/response/picture"
@@ -14,9 +16,13 @@ import (
 	"fmt"
 	"log"
 	"mime/multipart"
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
 	"unicode/utf8"
 
+	"github.com/PuerkitoBio/goquery"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +37,8 @@ func NewPictureService() *PictureService {
 }
 
 // 修改或插入图片数据到服务器中
-func (s *PictureService) UploadPicture(multipartFile *multipart.FileHeader, PictureUploadRequest *reqPicture.PictureUploadRequest, loginUser *entity.User) (*resPicture.PictureVO, *ecode.ErrorWithCode) {
+// 修改为接收接口类型，可以是URL地址或者文件（multipartFile）
+func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest *reqPicture.PictureUploadRequest, loginUser *entity.User) (*resPicture.PictureVO, *ecode.ErrorWithCode) {
 	//判断图片是需要新增还是需要更新
 	picId := uint64(0)
 	if PictureUploadRequest.ID != 0 {
@@ -39,14 +46,31 @@ func (s *PictureService) UploadPicture(multipartFile *multipart.FileHeader, Pict
 	}
 	//若更新图片，则需要校验图片是否存在
 	if picId != 0 {
-		_, err := s.PictureRepo.FindById(picId)
+		oldpic, err := s.PictureRepo.FindById(picId)
 		if err != nil {
-			return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "图片不存在")
+			return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库异常")
+		}
+		if oldpic == nil {
+			return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "图片不存在")
+		}
+		//权限校验，仅本人或管理员可以编辑
+		if loginUser.UserRole != consts.ADMIN_ROLE && loginUser.ID != oldpic.UserID {
+			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "权限不足")
 		}
 	}
 	//上传图片，得到信息
 	uploadPathPrefix := fmt.Sprintf("public/%d", loginUser.ID)
-	info, err := manager.UploadPicture(multipartFile, uploadPathPrefix)
+	var info *file.UploadPictureResult
+	var err *ecode.ErrorWithCode
+	//根据参数的不同类型，调用不同的方法。保证传入的正确性
+	switch v := picFile.(type) {
+	case *multipart.FileHeader:
+		info, err = manager.UploadPicture(v, uploadPathPrefix)
+	case string:
+		info, err = manager.UploadPictureByURL(v, uploadPathPrefix, PictureUploadRequest.PicName)
+	default:
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数错误")
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +86,8 @@ func (s *PictureService) UploadPicture(multipartFile *multipart.FileHeader, Pict
 		UserID:    loginUser.ID,
 		EditTime:  time.Now(),
 	}
+	//补充审核校验参数
+	s.FillReviewParamsInPic(pic, loginUser)
 	//若是更新，则需要更新ID
 	if picId != 0 {
 		pic.ID = picId
@@ -111,6 +137,16 @@ func (s *PictureService) GetQueryWrapper(db *gorm.DB, req *reqPicture.PictureQue
 	}
 	if req.PicScale != 0 {
 		query = query.Where("pic_scale = ?", req.PicScale)
+	}
+	//补充审核字段条件
+	if consts.ReviewValueExist(req.ReviewStatus) {
+		query = query.Where("review_status = ?", req.ReviewStatus)
+	}
+	if req.ReviewMessage != "" {
+		query = query.Where("review_message LIKE ?", "%"+req.ReviewMessage+"%")
+	}
+	if req.ReviewerID != 0 {
+		query = query.Where("reviewer_id = ?", req.ReviewerID)
 	}
 	//tags在数据库中的存储格式：["golang","java","c++"]
 	if len(req.Tags) > 0 {
@@ -211,7 +247,7 @@ func (s *PictureService) DeletePictureById(id uint64) *ecode.ErrorWithCode {
 }
 
 // 更新图片
-func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateRequest) *ecode.ErrorWithCode {
+func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateRequest, loginUser *entity.User) *ecode.ErrorWithCode {
 	//查询图片是否存在
 	oldPic, err := s.GetPictureById(updateReq.ID)
 	if err != nil {
@@ -232,6 +268,8 @@ func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateReques
 	tags, _ := json.Marshal(updateReq.Tags)
 	updateMap["tags"] = string(tags)
 	updateMap["edit_time"] = time.Now()
+	//填充审核参数
+	s.FillReviewParamsInMap(oldPic, loginUser, updateMap)
 	//更新
 	if err := s.PictureRepo.UpdateById(updateReq.ID, updateMap); err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
@@ -287,4 +325,124 @@ func (s *PictureService) ListPictureVOByPage(req *reqPicture.PictureQueryRequest
 		Records:      s.GetPictureVOList(list.Records),
 	}
 	return listVO, nil
+}
+
+// 图片审核功能，需要记录审核用户
+func (s *PictureService) DoPictureReview(req *reqPicture.PictureReviewRequest, user *entity.User) *ecode.ErrorWithCode {
+	//校验参数
+	reviewStatus := consts.ReviewValueExist(req.ReviewStatus)
+	if req.ID == 0 || !reviewStatus {
+		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数错误")
+	}
+	//判断图片是否存在
+	oldPic, err := s.PictureRepo.FindById(req.ID)
+	if err != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	if oldPic == nil {
+		return ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "图片不存在")
+	}
+	//校验审核状态是否重复
+	//若当前请求的状态，和图片原有状态一致，返回重复审核异常
+	if oldPic.ReviewStatus == req.ReviewStatus {
+		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "请勿重复审核")
+	}
+	//数据库操作
+
+	//记录要更新的值，防止全部更新效率过低
+	updateMap := make(map[string]interface{}, 8)
+	updateMap["review_status"] = req.ReviewStatus
+	updateMap["reviewer_id"] = user.ID
+	updateMap["review_time"] = time.Now()
+	updateMap["review_message"] = req.ReviewMessage
+	//执行更新
+	if err := s.PictureRepo.UpdateById(req.ID, updateMap); err != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	return nil
+}
+
+// 填充审核参数到指定的map中
+func (s *PictureService) FillReviewParamsInMap(Pic *entity.Picture, LoginUser *entity.User, UpdateMap map[string]interface{}) {
+	if LoginUser.UserRole == consts.ADMIN_ROLE {
+		UpdateMap["review_status"] = consts.PASS
+		UpdateMap["reviewer_id"] = LoginUser.ID
+		UpdateMap["review_time"] = time.Now()
+		UpdateMap["review_message"] = "管理员自动过审"
+	} else {
+		UpdateMap["review_status"] = consts.REVIEWING
+	}
+}
+
+// 填充审核参数到指定的Pic中
+func (s *PictureService) FillReviewParamsInPic(Pic *entity.Picture, LoginUser *entity.User) {
+	if LoginUser.UserRole == consts.ADMIN_ROLE {
+		Pic.ReviewStatus = consts.PASS
+		Pic.ReviewerID = LoginUser.ID
+		Pic.ReviewTime = time.Now()
+		Pic.ReviewMessage = "管理员自动过审"
+	} else {
+		Pic.ReviewStatus = consts.REVIEWING
+	}
+}
+
+// 批量爬取图片，返回成功数量。
+func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBatchRequest, loginUser *entity.User) (int, *ecode.ErrorWithCode) {
+	//1.校验参数
+	if req.Count > 30 {
+		return 0, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "一次最多上传30张图片")
+	}
+	if req.NamePrefix == "" {
+		req.NamePrefix = req.SearchText
+	}
+	//2.抓取内容
+	//searchText需要编码
+	encodedSearchText := url.QueryEscape(req.SearchText)
+	fetchUrl := fmt.Sprintf("https://cn.bing.com/images/async?q=%s&mmasync=1", encodedSearchText)
+	//创建链接
+	res, err := http.Get(fetchUrl)
+	if err != nil {
+		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "网络请求失败")
+	}
+	defer res.Body.Close()
+	//3.解析内容
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Println("解析失败，错误为", err)
+		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "解析失败")
+	}
+	//提取图片的div
+	div := doc.Find(".dgControl").First()
+	if div.Length() == 0 {
+		log.Println("解析失败，错误为", err)
+		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "解析失败")
+	}
+	//遍历图片标签
+	uploadCount := 0
+	div.Find("img.mimg").EachWithBreak(func(i int, img *goquery.Selection) bool {
+		//获取src属性，即图片URL
+		fileUrl, exists := img.Attr("src")
+		if !exists || strings.TrimSpace(fileUrl) == "" {
+			log.Println("当前链接为空，已跳过")
+			return true // 继续循环
+		}
+		//去掉url里面的参数，获取原始的图片地址
+		if idx := strings.Index(fileUrl, "?"); idx != -1 {
+			fileUrl = fileUrl[:idx]
+		}
+		//4.上传图片
+		//编写一个请求，模拟前端调用上传
+		uploadReq := &reqPicture.PictureUploadRequest{
+			FileUrl: fileUrl,
+			PicName: req.NamePrefix,
+		}
+		if _, err := s.UploadPicture(fileUrl, uploadReq, loginUser); err != nil {
+			log.Println("上传失败，错误为", err)
+		} else {
+			log.Println("上传成功")
+			uploadCount++
+		}
+		return uploadCount < req.Count
+	})
+	return uploadCount, nil
 }
