@@ -132,7 +132,6 @@ func AddUser(c *gin.Context) {
 		return
 	}
 	common.Success(c, user.ID)
-	return
 }
 
 // GetUserById godoc

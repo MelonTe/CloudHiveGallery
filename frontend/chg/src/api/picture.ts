@@ -180,6 +180,7 @@ export async function postPictureUploadBatch(
       'Content-Type': 'application/json',
     },
     data: body,
+    timeout: 60000,
     ...(options || {}),
   })
 }
