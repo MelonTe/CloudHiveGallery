@@ -92,6 +92,24 @@ export async function postPictureListPageVo(
   })
 }
 
+/** 带有缓存的分页获取一系列图片信息 POST /v1/picture/list/page/vo/cache */
+export async function postPictureListPageVoCache(
+  body: API.PictureQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.ListPictureVOResponse }>(
+    '/v1/picture/list/page/vo/cache',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: body,
+      ...(options || {}),
+    }
+  )
+}
+
 /** 执行图片审核「管理员」 POST /v1/picture/review */
 export async function postPictureReview(
   body: API.PictureReviewRequest,
@@ -180,7 +198,6 @@ export async function postPictureUploadBatch(
       'Content-Type': 'application/json',
     },
     data: body,
-    timeout: 60000,
     ...(options || {}),
   })
 }

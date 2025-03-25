@@ -10,6 +10,7 @@ import (
 type PictureVO struct {
 	ID           uint64         `json:"id,string"`
 	URL          string         `json:"url"`
+	ThumbnailURL string         `json:"thumbnailUrl"`
 	Name         string         `json:"name"`
 	Introduction string         `json:"introduction"`
 	Category     string         `json:"category"`
@@ -33,6 +34,7 @@ func VOToEntity(vo PictureVO) entity.Picture {
 	return entity.Picture{
 		ID:           vo.ID,
 		URL:          vo.URL,
+		ThumbnailURL: vo.ThumbnailURL,
 		Name:         vo.Name,
 		Introduction: vo.Introduction,
 		Category:     vo.Category,
@@ -57,6 +59,7 @@ func EntityToVO(entity entity.Picture, userVO resUser.UserVO) PictureVO {
 	return PictureVO{
 		ID:           entity.ID,
 		URL:          entity.URL,
+		ThumbnailURL: entity.ThumbnailURL,
 		Name:         entity.Name,
 		Introduction: entity.Introduction,
 		Category:     entity.Category,

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
@@ -111,6 +112,50 @@ func PutPicture(f io.Reader, key string) (*cos.Response, error) {
 	return res, nil
 }
 
+// 上传图片对象并且进行上传时压缩，保存成webp格式，返回原始响应体。
+// 注意，会覆盖原图存储，即最终只会保留webp格式的图片。
+// key是对象在存储桶中的唯一标识，例如"doc/test.png"。
+// 同时，会添加一个缩略图。
+func PutPictureWithCompress(f io.Reader, key string) (*cos.Response, error) {
+	//取出key的后缀，修改为webp
+	lastIdx := strings.LastIndex(key, ".")
+	var newKey string
+	var thumbnailKey string
+	//确保安全性
+	if lastIdx != -1 {
+		keyNoType := key[:lastIdx]
+		keyType := key[lastIdx:]
+		newKey = keyNoType + ".webp"
+		thumbnailKey = keyNoType + "_thumbnail" + keyType
+	}
+	pic := &cos.PicOperations{
+		IsPicInfo: 1,
+		Rules: []cos.PicOperationsRules{
+			{
+				Rule:   "imageMogr2/format/webp",
+				FileId: "/" + newKey,
+			},
+			{
+				Rule:   fmt.Sprintf("imageMogr2/thumbnail/%dx%d>", 256, 256),
+				FileId: "/" + thumbnailKey,
+			},
+		},
+	}
+	opt := &cos.ObjectPutOptions{
+		ObjectPutHeaderOptions: &cos.ObjectPutHeaderOptions{
+			XOptionHeader: &http.Header{},
+		},
+	}
+	opt.XOptionHeader.Add("Pic-Operations", cos.EncodePicOperations(pic))
+	res, err := tcos.Object.Put(context.Background(), key, f, opt)
+	if err != nil {
+		return nil, err
+	}
+	//删除旧图片
+	DeleteObject(key)
+	return res, nil
+}
+
 // 获取图片详细信息，返回详细信息的结构体
 // key是对象在存储桶中的唯一标识，例如"doc/test.jpg"。
 func GetPictureInfo(key string) (*PicInfo, error) {
@@ -131,4 +176,13 @@ func GetPictureInfo(key string) (*PicInfo, error) {
 		return nil, err
 	}
 	return &picInfo, nil
+}
+
+// 删除对象，key为唯一标识
+func DeleteObject(key string) error {
+	_, err := tcos.Object.Delete(context.Background(), key)
+	if err != nil {
+		return err
+	}
+	return nil
 }

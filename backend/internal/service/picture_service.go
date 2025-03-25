@@ -11,7 +11,12 @@ import (
 	resPicture "chg/internal/model/response/picture"
 	resUser "chg/internal/model/response/user"
 	"chg/internal/repository"
+	"chg/pkg/cache"
 	"chg/pkg/db"
+	"chg/pkg/rds"
+	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -63,7 +68,7 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	uploadPathPrefix := fmt.Sprintf("public/%d", loginUser.ID)
 	var info *file.UploadPictureResult
 	var err *ecode.ErrorWithCode
-	//根据参数的不同类型，调用不同的方法。保证传入的正确性
+	//根据参数的不同类型，调用不同的方法。请保证传入的正确性。
 	switch v := picFile.(type) {
 	case *multipart.FileHeader:
 		info, err = manager.UploadPicture(v, uploadPathPrefix)
@@ -77,15 +82,16 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	}
 	//构造插入数据库的实体
 	pic := &entity.Picture{
-		URL:       info.URL,
-		Name:      info.PicName,
-		PicSize:   info.PicSize,
-		PicWidth:  info.PicWidth,
-		PicHeight: info.PicHeight,
-		PicScale:  info.PicScale,
-		PicFormat: info.PicFormat,
-		UserID:    loginUser.ID,
-		EditTime:  time.Now(),
+		URL:          info.URL,
+		ThumbnailURL: info.ThumbnailURL,
+		Name:         info.PicName,
+		PicSize:      info.PicSize,
+		PicWidth:     info.PicWidth,
+		PicHeight:    info.PicHeight,
+		PicScale:     info.PicScale,
+		PicFormat:    info.PicFormat,
+		UserID:       loginUser.ID,
+		EditTime:     time.Now(),
 	}
 	//补充审核校验参数
 	s.FillReviewParamsInPic(pic, loginUser)
@@ -326,6 +332,74 @@ func (s *PictureService) ListPictureVOByPage(req *reqPicture.PictureQueryRequest
 		Records:      s.GetPictureVOList(list.Records),
 	}
 	return listVO, nil
+}
+
+// 分页查询图片视图（带缓存、多级缓存模式ristretto + redis）
+func (s *PictureService) ListPictureVOByPageWithCache(req *reqPicture.PictureQueryRequest) (*resPicture.ListPictureVOResponse, *ecode.ErrorWithCode) {
+	//获取redis客户端，和本地缓存
+	redisClient := rds.GetRedisClient()
+	localCache := cache.GetCache()
+	// 将req转为json字符串，并用md5进行压缩
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "参数序列化失败")
+	}
+	//进一步将请求转化为缓存key
+	hash := md5.Sum(reqBytes)
+	m5Str := hex.EncodeToString(hash[:])
+	cacheKey := fmt.Sprintf("chg:ListPictureVOByPage:%s", m5Str)
+	//尝试获取缓存
+	//1.本地缓存获取
+	dataInterface, found := localCache.Get(cacheKey)
+	if found && dataInterface != nil {
+		//断言，保证数据为Byte数组
+		dataBytes, _ := dataInterface.([]byte)
+		//本地缓存命中，直接返回
+		var cachedList resPicture.ListPictureVOResponse
+		if err := json.Unmarshal(dataBytes, &cachedList); err == nil {
+			log.Println("本地缓存命中，数据成功返回")
+			return &cachedList, nil
+		}
+	}
+	//2.分布式缓存获取
+	cachedData, err := redisClient.Get(context.Background(), cacheKey).Result()
+	if rds.IsNilErr(err) {
+		log.Println("缓存未命中，查询数据库...")
+	} else if err != nil {
+		log.Printf("Redis 读取失败: %v\n", err) // 仅做警告，不中断流程
+	} else if cachedData != "" {
+		var cachedList resPicture.ListPictureVOResponse
+		if err := json.Unmarshal([]byte(cachedData), &cachedList); err == nil {
+			log.Println("缓存命中，数据成功返回")
+			return &cachedList, nil
+		} else {
+			log.Println("缓存解析失败，重新查询数据库")
+		}
+	}
+
+	//缓存未击中，正常流程，并将结果放入缓存
+
+	data, Eerr := s.ListPictureVOByPage(req)
+	if Eerr != nil {
+		return nil, Eerr
+	}
+	//数据序列化，加入缓存中，允许存储空值
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		//序列化失败，不影响正常流程
+		log.Println("数据序列化失败，错误为", err)
+		return data, nil
+	}
+	//设置过期时间，为5分钟~10分钟
+	expireTime := time.Duration(rand.IntN(300)+300) * time.Second
+	expireTime2 := time.Duration(rand.IntN(200)+300) * time.Second
+	_, err = redisClient.Set(context.Background(), cacheKey, dataBytes, expireTime).Result()
+	if err != nil {
+		log.Println("设置缓存失败，错误为", err)
+	}
+	localCache.SetWithTTL(cacheKey, dataBytes, 1, expireTime2)
+	//返回数据
+	return data, nil
 }
 
 // 图片审核功能，需要记录审核用户

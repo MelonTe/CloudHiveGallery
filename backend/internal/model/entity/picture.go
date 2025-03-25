@@ -8,6 +8,7 @@ import (
 type Picture struct {
 	ID            uint64         `gorm:"primaryKey;comment:id" json:"id,string" swaggertype:"string"`
 	URL           string         `gorm:"type:varchar(512);not null;comment:图片 url" json:"url"`
+	ThumbnailURL  string         `gorm:"type:varchar(512);comment:缩略图 url;default:null" json:"thumbnailUrl"`
 	Name          string         `gorm:"type:varchar(128);not null;index:idx_name;comment:图片名称" json:"name"`
 	Introduction  string         `gorm:"type:varchar(512);index:idx_introduction;comment:简介" json:"introduction"`
 	Category      string         `gorm:"type:varchar(64);index:idx_category;comment:分类" json:"category"`

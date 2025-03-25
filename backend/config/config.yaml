@@ -9,3 +9,7 @@ tcos:
     bucketName: "cloudhivegallery-1348386678"
     region: "ap-guangzhou"
     host: "https://cloudhivegallery-1348386678.cos.ap-guangzhou.myqcloud.com"
+rds:
+    host: "localhost"
+    port: 6379
+    password: "chg"
