@@ -43,30 +43,36 @@ func UploadPicture(multipartFile *multipart.FileHeader, uploadPrefix string) (*f
 	//文件名
 	uploadFileName := fmt.Sprintf("%s_%s.%s", time.Now().Format("2006-01-02"), id, fileType)
 	fileNameNoType := uploadFileName[:strings.LastIndex(uploadFileName, ".")]
-	//最终文件名
+	//存储到COS的Key
 	uploadPath := fmt.Sprintf("%s/%s", uploadPrefix, uploadFileName)
 	//3.解析结果并且返回
 	//打开文件流
 	src, _ := multipartFile.Open()
 	defer src.Close()
-	_, err := tcos.PutPicture(src, uploadPath)
+	//调用压缩图片上传请求
+	_, err := tcos.PutPictureWithCompress(src, uploadPath)
 	if err != nil {
 		log.Print(err)
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "上传失败")
 	}
+	//最终要获取的图片信息，为压缩后的图片信息。因此需要修改文件的后缀
+	uploadPath = strings.Replace(uploadPath, fileType, "webp", 1)
+	//缩略图路径
+	thumbnailUrl := strings.Replace(uploadPath, ".webp", "_thumbnail."+fileType, 1)
 	//获取图片信息结构体
 	picInfo, err := tcos.GetPictureInfo(uploadPath)
 	if err != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片信息失败")
 	}
 	return &file.UploadPictureResult{
-		URL:       config.LoadConfig().Tcos.Host + "/" + uploadPath,
-		PicName:   fileNameNoType,
-		PicSize:   picInfo.Size,
-		PicWidth:  picInfo.Width,
-		PicHeight: picInfo.Height,
-		PicScale:  math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
-		PicFormat: picInfo.Format,
+		URL:          config.LoadConfig().Tcos.Host + "/" + uploadPath,
+		ThumbnailURL: config.LoadConfig().Tcos.Host + "/" + thumbnailUrl,
+		PicName:      fileNameNoType,
+		PicSize:      picInfo.Size,
+		PicWidth:     picInfo.Width,
+		PicHeight:    picInfo.Height,
+		PicScale:     math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
+		PicFormat:    picInfo.Format,
 	}, nil
 }
 
@@ -136,18 +142,21 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 	fileType := localFilePath[strings.LastIndex(localFilePath, ".")+1:]
 	//上传到COS的文件名（id）
 	uploadFileName := fmt.Sprintf("%s_%s.%s", time.Now().Format("2006-01-02"), id, fileType)
-	//最终上传COS的文件名（id）
+	//最终上传COS的key，包含了前缀（id）
 	uploadPath := fmt.Sprintf("%s/%s", uploadPrefix, uploadFileName)
 	//4.解析结果并且返回
 	//打开文件流
 	src, _ := os.Open(localFilePath)
 	defer src.Close()
-	_, errr := tcos.PutPicture(src, uploadPath)
+	_, errr := tcos.PutPictureWithCompress(src, uploadPath)
 	if errr != nil {
 		log.Print(errr)
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "上传失败")
 	}
-	//获取图片信息结构体
+	//获取图片信息结构体，经过了压缩需要获取webp格式的图片信息
+	uploadPath = strings.Replace(uploadPath, fileType, "webp", 1)
+	//缩略图路径
+	thumbnailUrl := strings.Replace(uploadPath, ".webp", "_thumbnail."+fileType, 1)
 	picInfo, errr := tcos.GetPictureInfo(uploadPath)
 	if errr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片信息失败")
@@ -155,13 +164,14 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 	//picName去除后缀，作为图片昵称
 	picNameNoType := picName[:strings.LastIndex(picName, ".")]
 	return &file.UploadPictureResult{
-		URL:       config.LoadConfig().Tcos.Host + "/" + uploadPath,
-		PicName:   picNameNoType,
-		PicSize:   picInfo.Size,
-		PicWidth:  picInfo.Width,
-		PicHeight: picInfo.Height,
-		PicScale:  math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
-		PicFormat: picInfo.Format,
+		URL:          config.LoadConfig().Tcos.Host + "/" + uploadPath,
+		ThumbnailURL: config.LoadConfig().Tcos.Host + "/" + thumbnailUrl,
+		PicName:      picNameNoType,
+		PicSize:      picInfo.Size,
+		PicWidth:     picInfo.Width,
+		PicHeight:    picInfo.Height,
+		PicScale:     math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
+		PicFormat:    picInfo.Format,
 	}, nil
 }
 

@@ -20,6 +20,11 @@ type Config struct {
 		Region     string `mapstructure:"region"`
 		Host       string `mapstructure:"host"`
 	}
+	Rds struct {
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		Password string `mapstructure:"password"`
+	}
 }
 
 var config *Config

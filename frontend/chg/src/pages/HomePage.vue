@@ -48,7 +48,7 @@
           >
             <template #cover>
               <div class="cover-container">
-                <img :alt="picture.name" :src="picture.url" class="cover-image" />
+                <img :alt="picture.name" :src="picture.thumbnailUrl || picture.url" class="cover-image" />
               </div>
             </template>
             <a-card-meta :title="picture.name">

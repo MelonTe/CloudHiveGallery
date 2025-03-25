@@ -3,6 +3,7 @@ package main
 import (
 	"chg/cmd"
 	_ "chg/docs"
+	_ "chg/pkg/rds"
 )
 
 // @title           CloudHiveGallery

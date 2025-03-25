@@ -410,6 +410,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/picture/list/page/vo/cache": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "带有缓存的分页获取一系列图片信息",
+                "parameters": [
+                    {
+                        "description": "需要查询的页数、以及图片关键信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureQueryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/picture.ListPictureVOResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/picture/review": {
             "post": {
                 "consumes": [
@@ -1276,6 +1327,9 @@ const docTemplate = `{
                     "description": "存储的格式：[\"golang\",\"java\",\"c++\"]",
                     "type": "string"
                 },
+                "thumbnailUrl": {
+                    "type": "string"
+                },
                 "updateTime": {
                     "type": "string"
                 },
@@ -1617,6 +1671,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "thumbnailUrl": {
+                    "type": "string"
                 },
                 "updateTime": {
                     "type": "string"

@@ -261,6 +261,34 @@ func ListPictureVOByPage(c *gin.Context) {
 	common.Success(c, *pics)
 }
 
+// ListPictureVOByPageWithCache godoc
+// @Summary      带有缓存的分页获取一系列图片信息
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.PictureQueryRequest true "需要查询的页数、以及图片关键信息"
+// @Success      200  {object}  common.Response{data=resPicture.ListPictureVOResponse} "查询成功"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/picture/list/page/vo/cache [POST]
+func ListPictureVOByPageWithCache(c *gin.Context) {
+	queryReq := reqPicture.PictureQueryRequest{}
+	c.ShouldBind(&queryReq)
+	//限制爬虫
+	if queryReq.PageSize > 20 {
+		common.BaseResponse(c, nil, "最多只允许获取20张/页", ecode.PARAMS_ERROR)
+		return
+	}
+	//普通用户默认只允许查询过审图片
+	queryReq.ReviewStatus = consts.PASS
+	//获取分页查询对象
+	pics, err := sPicture.ListPictureVOByPageWithCache(&queryReq)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, *pics)
+}
+
 // EditPicture godoc
 // @Summary      更新图片
 // @Description  若图片不存在，则返回false

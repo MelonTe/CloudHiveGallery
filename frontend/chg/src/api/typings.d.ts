@@ -82,6 +82,7 @@ declare namespace API {
     reviewerId?: string
     /** 存储的格式：["golang","java","c++"] */
     tags?: string
+    thumbnailUrl?: string
     updateTime?: string
     url?: string
     userId?: string
@@ -179,6 +180,7 @@ declare namespace API {
     picSize?: number
     picWidth?: number
     tags?: string[]
+    thumbnailUrl?: string
     updateTime?: string
     url?: string
     user?: UserVO

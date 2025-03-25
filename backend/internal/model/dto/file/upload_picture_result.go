@@ -4,11 +4,12 @@ package file
 
 //用于接收图片解析信息
 type UploadPictureResult struct {
-	URL       string  `json:"url"`
-	PicName   string  `json:"picName"`
-	PicSize   int64   `json:"picSize"`
-	PicWidth  int     `json:"picWidth"`
-	PicHeight int     `json:"picHeight"`
-	PicScale  float64 `json:"picScale"`
-	PicFormat string  `json:"picFormat"`
+	URL          string  `json:"url"`
+	ThumbnailURL string  `json:"thumbnailUrl"`
+	PicName      string  `json:"picName"`
+	PicSize      int64   `json:"picSize"`
+	PicWidth     int     `json:"picWidth"`
+	PicHeight    int     `json:"picHeight"`
+	PicScale     float64 `json:"picScale"`
+	PicFormat    string  `json:"picFormat"`
 }
