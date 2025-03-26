@@ -48,6 +48,14 @@ func RegisterV1Routes(r *gin.Engine) {
 			pictureAPI.GET("/tag_category", controller.ListPictureTagCategory)
 			pictureAPI.POST("/review", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.DoPictureReview)
 		}
+		spaceAPI := apiV1.Group("/space")
+		{
+			spaceAPI.POST("/update", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.UpdateSpace)
+			spaceAPI.POST("/edit", controller.EditPicture)
+			spaceAPI.POST("/list/page", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.ListSpaceByPage)
+			spaceAPI.POST("/list/page/vo", controller.ListSpaceVOByPage)
+			spaceAPI.POST("/add", middleware.LoginCheck(service.NewUserService()), controller.AddSpace)
+		}
 	}
 
 }

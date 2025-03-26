@@ -15,12 +15,6 @@ import (
 
 // 获取一个pictureService单例
 var sPicture *service.PictureService = service.NewPictureService()
-var sUser *service.UserService = service.NewUserService()
-
-func init() {
-	//防止引用错误
-	_ = resPicture.PictureVO{}
-}
 
 // UploadPicture godoc
 // @Summary      上传图片接口「需要登录校验」
@@ -309,11 +303,11 @@ func EditPicture(c *gin.Context) {
 	}
 	//校验是否本人或管理员操作
 	user, _ := sUser.GetLoginUser(c)
-	if user == nil || !(updateReq.ID == user.ID) && !(user.UserRole == "admin") {
-		common.BaseResponse(c, false, "无权限", ecode.NO_AUTH_ERROR)
+	if user == nil {
+		common.BaseResponse(c, false, "未登录", ecode.NOT_LOGIN_ERROR)
 		return
 	}
-	//更新操作，参数校验等在service层完成
+	//更新操作，参数校验和权限等在service层完成
 	if err := sPicture.UpdatePicture(&updateReq, user); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return

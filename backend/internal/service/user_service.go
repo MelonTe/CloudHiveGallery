@@ -27,6 +27,28 @@ func NewUserService() *UserService {
 	}
 }
 
+// 根据id获取用户
+func (s *UserService) GetUserById(id uint64) (*entity.User, *ecode.ErrorWithCode) {
+	user, err := s.UserRepo.FindById(nil, id)
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库查询错误")
+	}
+	if user == nil {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "用户不存在")
+	}
+	return user, nil
+}
+
+// 根据id获取用户视图
+func (s *UserService) GetUserVOById(id uint64) (*resUser.UserVO, *ecode.ErrorWithCode) {
+	user, err := s.GetUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	userVO := resUser.GetUserVO(*user)
+	return &userVO, nil
+}
+
 // 执行用户注册服务，用户默认权限为user，昵称为无名
 func (s *UserService) UserRegister(userAccount, userPassword, checkPassword string) (uint64, *ecode.ErrorWithCode) {
 	//1.校验
@@ -46,7 +68,7 @@ func (s *UserService) UserRegister(userAccount, userPassword, checkPassword stri
 	//2.检查是否重复
 	var cnt int64
 	var err error
-	if cnt, err = s.UserRepo.CountByAccount(userAccount); err != nil {
+	if cnt, err = s.UserRepo.CountByAccount(nil, userAccount); err != nil {
 		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库查询错误")
 	}
 	if cnt > 0 {
@@ -61,7 +83,7 @@ func (s *UserService) UserRegister(userAccount, userPassword, checkPassword stri
 		UserName:     "无名",
 		UserRole:     "user",
 	}
-	if err = s.UserRepo.CreateUser(user); err != nil {
+	if err = s.UserRepo.CreateUser(nil, user); err != nil {
 		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误，注册失败")
 	}
 	return user.ID, nil
@@ -83,7 +105,7 @@ func (s *UserService) UserLogin(c *gin.Context, userAccount, userPassword string
 	}
 	//2.加密、查询用户是否存在
 	hashPsw := argon2.GetEncryptString(userPassword, userPassword[:5])
-	user, err := s.UserRepo.FindByAccountAndPassword(userAccount, hashPsw)
+	user, err := s.UserRepo.FindByAccountAndPassword(nil, userAccount, hashPsw)
 	if err != nil {
 		//数据库异常
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库查询异常")
@@ -108,7 +130,7 @@ func (s *UserService) GetLoginUser(c *gin.Context) (*entity.User, *ecode.ErrorWi
 		return nil, ecode.GetErrWithDetail(ecode.NOT_LOGIN_ERROR, "用户未登录")
 	}
 	//数据库进行ID查询，避免数据不一致。追求性能可以不查询。
-	curUser, err := s.UserRepo.FindById(currentUser.ID)
+	curUser, err := s.UserRepo.FindById(nil, currentUser.ID)
 	if err != nil {
 		//数据库异常
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库查询失败")
@@ -176,7 +198,7 @@ func (s *UserService) GetQueryWrapper(db *gorm.DB, req *reqUser.UserQueryRequest
 
 // 根据ID软删除用户
 func (s *UserService) RemoveById(id uint64) (bool, *ecode.ErrorWithCode) {
-	if suc, err := s.UserRepo.RemoveById(id); err != nil {
+	if suc, err := s.UserRepo.RemoveById(nil, id); err != nil {
 		return false, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	} else {
 		if !suc {
@@ -188,7 +210,7 @@ func (s *UserService) RemoveById(id uint64) (bool, *ecode.ErrorWithCode) {
 
 // 更新用户信息，不存在则返回错误
 func (s *UserService) UpdateUser(u *entity.User) *ecode.ErrorWithCode {
-	if suc, err := s.UserRepo.UpdateUser(u); err != nil {
+	if suc, err := s.UserRepo.UpdateUser(nil, u); err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	} else {
 		if !suc {
@@ -204,7 +226,7 @@ func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUs
 	if err != nil {
 		return nil, err
 	}
-	total, _ := s.UserRepo.GetQueryUsersNum(query)
+	total, _ := s.UserRepo.GetQueryUsersNum(nil, query)
 	//拼接分页
 	if queryReq.Current == 0 {
 		queryReq.Current = 1
@@ -212,7 +234,7 @@ func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUs
 	//重置query
 	query, _ = s.GetQueryWrapper(db.LoadDB(), queryReq)
 	query = query.Offset((queryReq.Current - 1) * queryReq.PageSize).Limit(queryReq.PageSize)
-	users, errr := s.UserRepo.ListUserByPage(query)
+	users, errr := s.UserRepo.ListUserByPage(nil, query)
 	if errr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}

@@ -2,11 +2,11 @@ package rds
 
 import (
 	"chg/config"
+	"chg/pkg/redlock"
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/redis/go-redis/v9"
+	"log"
 )
 
 var redisClient *redis.Client
@@ -30,6 +30,8 @@ func init() {
 	if status != nil {
 		log.Fatalf("Redis Set Error:", status)
 	}
+	//初始化redis分布式锁
+	redlock.InitRedSync(redisClient)
 }
 
 func GetRedisClient() *redis.Client {
