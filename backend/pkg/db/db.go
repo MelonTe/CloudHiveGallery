@@ -27,6 +27,7 @@ func init() {
 	//自动迁移model
 	entity.AutoMigrateUser(db)
 	entity.AutoMigratePicture(db)
+	entity.AutoMigrateSpace(db)
 }
 func LoadDB() *gorm.DB {
 	return db

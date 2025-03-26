@@ -52,7 +52,7 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	}
 	//若更新图片，则需要校验图片是否存在
 	if picId != 0 {
-		oldpic, err := s.PictureRepo.FindById(picId)
+		oldpic, err := s.PictureRepo.FindById(nil, picId)
 		if err != nil {
 			return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库异常")
 		}
@@ -100,7 +100,7 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		pic.ID = picId
 	}
 	//进行插入或者更新操作，即save
-	errr := s.PictureRepo.SavePicture(pic)
+	errr := s.PictureRepo.SavePicture(nil, pic)
 	if errr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
@@ -174,7 +174,7 @@ func (s *PictureService) GetQueryWrapper(db *gorm.DB, req *reqPicture.PictureQue
 
 // 获取一个PicVO对象
 func (s *PictureService) GetPictureVO(Picture *entity.Picture) *resPicture.PictureVO {
-	user, err := repository.NewUserRepository().FindById(Picture.UserID)
+	user, err := repository.NewUserRepository().FindById(nil, Picture.UserID)
 	if err != nil {
 		return nil
 	}
@@ -197,7 +197,7 @@ func (s *PictureService) GetPictureVOList(Pictures []entity.Picture) []resPictur
 	for _, Picture := range Pictures {
 		//user还没被查询，那么就查询
 		if _, ok := userMap[Picture.UserID]; !ok {
-			user, err := repository.NewUserRepository().FindById(Picture.UserID)
+			user, err := repository.NewUserRepository().FindById(nil, Picture.UserID)
 			if err != nil {
 				log.Println("GetPictureVOList: 查询用户失败，错误为", err)
 				//跳过
@@ -234,7 +234,7 @@ func (s *PictureService) ValidPicture(Picture *entity.Picture) *ecode.ErrorWithC
 
 // 根据ID获取图片，若图片不存在则返回错误
 func (s *PictureService) GetPictureById(id uint64) (*entity.Picture, *ecode.ErrorWithCode) {
-	Picture, err := s.PictureRepo.FindById(id)
+	Picture, err := s.PictureRepo.FindById(nil, id)
 	if err != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
@@ -246,19 +246,23 @@ func (s *PictureService) GetPictureById(id uint64) (*entity.Picture, *ecode.Erro
 
 // 根据ID删除图片
 func (s *PictureService) DeletePictureById(id uint64) *ecode.ErrorWithCode {
-	err := s.PictureRepo.DeleteById(id)
+	err := s.PictureRepo.DeleteById(nil, id)
 	if err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	return nil
 }
 
-// 更新图片
+// 更新图片，会进行权限校验
 func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateRequest, loginUser *entity.User) *ecode.ErrorWithCode {
 	//查询图片是否存在
 	oldPic, err := s.GetPictureById(updateReq.ID)
 	if err != nil {
 		return err
+	}
+	//权限校验
+	if !(oldPic.UserID == loginUser.ID) && !(loginUser.UserRole == "admin") {
+		return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "无权限")
 	}
 	//校验图片参数
 	oldPic.Name = updateReq.Name
@@ -278,7 +282,7 @@ func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateReques
 	//填充审核参数
 	s.FillReviewParamsInMap(oldPic, loginUser, updateMap)
 	//更新
-	if err := s.PictureRepo.UpdateById(updateReq.ID, updateMap); err != nil {
+	if err := s.PictureRepo.UpdateById(nil, updateReq.ID, updateMap); err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	return nil
@@ -410,7 +414,7 @@ func (s *PictureService) DoPictureReview(req *reqPicture.PictureReviewRequest, u
 		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数错误")
 	}
 	//判断图片是否存在
-	oldPic, err := s.PictureRepo.FindById(req.ID)
+	oldPic, err := s.PictureRepo.FindById(nil, req.ID)
 	if err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
@@ -431,7 +435,7 @@ func (s *PictureService) DoPictureReview(req *reqPicture.PictureReviewRequest, u
 	updateMap["review_time"] = time.Now()
 	updateMap["review_message"] = req.ReviewMessage
 	//执行更新
-	if err := s.PictureRepo.UpdateById(req.ID, updateMap); err != nil {
+	if err := s.PictureRepo.UpdateById(nil, req.ID, updateMap); err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	return nil

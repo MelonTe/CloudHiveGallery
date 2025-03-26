@@ -15,7 +15,7 @@ import (
 // 接口前缀为/user
 // param	用空格分隔的参数。param name,param type,data type,is mandatory?,comment attribute(optional)
 // 获取一个userservice单例
-var s *service.UserService = service.NewUserService()
+var sUser *service.UserService = service.NewUserService()
 
 // UserRegister godoc
 // @Summary      注册用户
@@ -34,7 +34,7 @@ func UserRegister(c *gin.Context) {
 		common.BaseResponse(c, nil, "参数绑定错误", ecode.PARAMS_ERROR)
 		return
 	}
-	if id, err := s.UserRegister(uReg.UserAccount, uReg.UserPassword, uReg.CheckPassword); err != nil {
+	if id, err := sUser.UserRegister(uReg.UserAccount, uReg.UserPassword, uReg.CheckPassword); err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	} else {
@@ -59,7 +59,7 @@ func UserLogin(c *gin.Context) {
 		common.BaseResponse(c, nil, "参数绑定错误", ecode.PARAMS_ERROR)
 		return
 	}
-	if userVO, err := s.UserLogin(c, uLog.UserAccount, uLog.UserPassword); err != nil {
+	if userVO, err := sUser.UserLogin(c, uLog.UserAccount, uLog.UserPassword); err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	} else {
@@ -76,7 +76,7 @@ func UserLogin(c *gin.Context) {
 // @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
 // @Router       /v1/user/get/login [GET]
 func GetLoginUser(c *gin.Context) {
-	user, err := s.GetLoginUser(c)
+	user, err := sUser.GetLoginUser(c)
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
@@ -93,7 +93,7 @@ func GetLoginUser(c *gin.Context) {
 // @Failure      400  {object}  common.Response "注册失败，详情见响应中的code"
 // @Router       /v1/user/logout [POST]
 func UserLogout(c *gin.Context) {
-	suc, err := s.UserLogout(c)
+	suc, err := sUser.UserLogout(c)
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
@@ -127,7 +127,7 @@ func AddUser(c *gin.Context) {
 		UserProfile:  uReg.UserProfile,
 		UserAvatar:   uReg.UserAvatar,
 	}
-	if err := s.UserRepo.CreateUser(user); err != nil {
+	if err := sUser.UserRepo.CreateUser(nil, user); err != nil {
 		common.BaseResponse(c, nil, "数据库错误，注册失败", ecode.SYSTEM_ERROR)
 		return
 	}
@@ -149,7 +149,7 @@ func GetUserById(c *gin.Context) {
 		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
 		return
 	}
-	user, err := s.UserRepo.FindById(id)
+	user, err := sUser.UserRepo.FindById(nil, id)
 	if err != nil {
 		common.BaseResponse(c, nil, "数据库错误，查询失败", ecode.SYSTEM_ERROR)
 		return
@@ -176,7 +176,7 @@ func GetUserVOById(c *gin.Context) {
 		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
 		return
 	}
-	user, err := s.UserRepo.FindById(id)
+	user, err := sUser.UserRepo.FindById(nil, id)
 	if err != nil {
 		common.BaseResponse(c, nil, "数据库错误，查询失败", ecode.SYSTEM_ERROR)
 		return
@@ -205,7 +205,7 @@ func DeleteUser(c *gin.Context) {
 		common.BaseResponse(c, false, "删除失败，参数错误", ecode.PARAMS_ERROR)
 		return
 	}
-	if suc, err := s.RemoveById(deleReq.Id); err != nil {
+	if suc, err := sUser.RemoveById(deleReq.Id); err != nil {
 		common.BaseResponse(c, suc, err.Msg, err.Code)
 		return
 	}
@@ -236,7 +236,7 @@ func UpdateUser(c *gin.Context) {
 		UserProfile: updateReq.UserProfile,
 		UserRole:    updateReq.UserRole,
 	}
-	if err := s.UpdateUser(&u); err != nil {
+	if err := sUser.UpdateUser(&u); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return
 	}
@@ -256,7 +256,7 @@ func UpdateUser(c *gin.Context) {
 func ListUserVOByPage(c *gin.Context) {
 	queryReq := reqUser.UserQueryRequest{}
 	c.ShouldBind(&queryReq)
-	users, err := s.ListUserByPage(&queryReq)
+	users, err := sUser.ListUserByPage(&queryReq)
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return

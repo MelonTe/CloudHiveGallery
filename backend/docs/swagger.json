@@ -755,6 +755,263 @@
                 }
             }
         },
+        "/v1/space/add": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "增加空间「需要登录」",
+                "parameters": [
+                    {
+                        "description": "需要增加的空间信息字段",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/space.SpaceAddRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回空间ID，字符串格式",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/edit": {
+            "post": {
+                "description": "若空间不存在，则返回false",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "编辑空间",
+                "parameters": [
+                    {
+                        "description": "需要更新的空间信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/space.SpaceUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/list/page": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "分页获取一系列空间信息「管理员」",
+                "parameters": [
+                    {
+                        "description": "需要查询的空间信息字段",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/space.SpaceQueryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/space.ListSpaceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/list/page/vo": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "分页获取一系列空间视图信息",
+                "parameters": [
+                    {
+                        "description": "需要查询的空间信息字段",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/space.SpaceQueryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/space.ListSpaceVOResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/update": {
+            "post": {
+                "description": "若空间不存在，则返回false",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "更新空间「管理员」",
+                "parameters": [
+                    {
+                        "description": "需要更新的空间信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/space.SpaceUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/add": {
             "post": {
                 "description": "默认密码为12345678",
@@ -1316,6 +1573,10 @@
                     "type": "string",
                     "example": ""
                 },
+                "spaceId": {
+                    "type": "string",
+                    "example": ""
+                },
                 "tags": {
                     "description": "存储的格式：[\"golang\",\"java\",\"c++\"]",
                     "type": "string"
@@ -1327,6 +1588,46 @@
                     "type": "string"
                 },
                 "url": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "entity.Space": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string"
+                },
+                "editTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": ""
+                },
+                "maxCount": {
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "type": "integer"
+                },
+                "spaceLevel": {
+                    "type": "integer"
+                },
+                "spaceName": {
+                    "type": "string"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalSize": {
+                    "type": "integer"
+                },
+                "updateTime": {
                     "type": "string"
                 },
                 "userId": {
@@ -1680,6 +1981,183 @@
                 "userId": {
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "space.ListSpaceResponse": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "description": "当前页数",
+                    "type": "integer"
+                },
+                "pages": {
+                    "description": "总页数",
+                    "type": "integer"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Space"
+                    }
+                },
+                "size": {
+                    "description": "页面大小",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总记录数",
+                    "type": "integer"
+                }
+            }
+        },
+        "space.ListSpaceVOResponse": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "description": "当前页数",
+                    "type": "integer"
+                },
+                "pages": {
+                    "description": "总页数",
+                    "type": "integer"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/space.SpaceVO"
+                    }
+                },
+                "size": {
+                    "description": "页面大小",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总记录数",
+                    "type": "integer"
+                }
+            }
+        },
+        "space.SpaceAddRequest": {
+            "type": "object",
+            "properties": {
+                "spaceLevel": {
+                    "description": "空间级别：0-普通版 1-专业版 2-旗舰版",
+                    "type": "integer"
+                },
+                "spaceName": {
+                    "description": "空间名称",
+                    "type": "string"
+                }
+            }
+        },
+        "space.SpaceQueryRequest": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "description": "当前页数",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "空间 ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "pageSize": {
+                    "description": "页面大小",
+                    "type": "integer"
+                },
+                "sortField": {
+                    "description": "排序字段",
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "description": "排序顺序（默认升序）",
+                    "type": "string"
+                },
+                "spaceLevel": {
+                    "description": "空间级别：0-普通版 1-专业版 2-旗舰版",
+                    "type": "integer"
+                },
+                "spaceName": {
+                    "description": "空间名称",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户 ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "space.SpaceUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Space ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "maxCount": {
+                    "description": "Maximum number of space images",
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "description": "Maximum total size of space images",
+                    "type": "integer"
+                },
+                "spaceLevel": {
+                    "description": "Space level: 0-普通版 1-专业版 2-旗舰版",
+                    "type": "integer"
+                },
+                "spaceName": {
+                    "description": "Space name",
+                    "type": "string"
+                }
+            }
+        },
+        "space.SpaceVO": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string"
+                },
+                "editTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Space ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "maxCount": {
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "type": "integer"
+                },
+                "spaceLevel": {
+                    "type": "integer"
+                },
+                "spaceName": {
+                    "type": "string"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalSize": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/user.UserVO"
+                },
+                "userId": {
+                    "description": "User ID",
+                    "type": "string",
+                    "example": ""
                 }
             }
         },
