@@ -37,7 +37,7 @@ func RegisterV1Routes(r *gin.Engine) {
 			pictureAPI.POST("/upload", middleware.LoginCheck(service.NewUserService()), controller.UploadPicture)
 			pictureAPI.POST("/upload/url", middleware.LoginCheck(service.NewUserService()), controller.UploadPictureByUrl)
 			pictureAPI.POST("/upload/batch", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.UploadPictureByBatch)
-			pictureAPI.POST("/delete", controller.DeletePicture)
+			pictureAPI.POST("/delete", middleware.LoginCheck(service.NewUserService()), controller.DeletePicture)
 			pictureAPI.POST("/update", middleware.LoginCheck(service.NewUserService()), controller.UpdatePicture)
 			pictureAPI.POST("/edit", middleware.LoginCheck(service.NewUserService()), controller.UpdatePicture)
 			pictureAPI.GET("/get", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.GetPictureById)

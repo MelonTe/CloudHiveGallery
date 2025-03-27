@@ -24,13 +24,19 @@ var sPicture *service.PictureService = service.NewPictureService()
 // @Produce      json
 // @Param        file formData file true "图片"
 // @Param        id formData string false "图片的ID，非必需"
+// @Param        spaceId formData string false "图片的上传空间ID，非必需"
 // @Success      200  {object}  common.Response{data=resPicture.PictureVO} "上传成功，返回图片信息视图"
 // @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
 // @Router       /v1/picture/upload [POST]
 func UploadPicture(c *gin.Context) {
 	file, _ := c.FormFile("file")
-	picReq := &reqPicture.PictureUploadRequest{}
-	c.ShouldBind(picReq)
+	// 手动解析表单参数
+	id, _ := strconv.ParseUint(c.PostForm("id"), 10, 64)
+	spaceId, _ := strconv.ParseUint(c.PostForm("spaceId"), 10, 64)
+	picReq := &reqPicture.PictureUploadRequest{
+		ID:      id,      // 获取 id
+		SpaceID: spaceId, // 获取 spaceId
+	}
 	loginUser, err := sUser.GetLoginUser(c)
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
@@ -96,7 +102,7 @@ func UploadPictureByBatch(c *gin.Context) {
 }
 
 // DeletePicture godoc
-// @Summary      根据ID软删除图片
+// @Summary      根据ID软删除图片「登录校验」
 // @Tags         picture
 // @Accept       json
 // @Produce      json
@@ -111,19 +117,8 @@ func DeletePicture(c *gin.Context) {
 		common.BaseResponse(c, false, "删除失败，参数错误", ecode.PARAMS_ERROR)
 		return
 	}
-	//判断id图片是否存在
-	oldPic, err := sPicture.GetPictureById(deleReq.Id)
-	if err != nil {
-		common.BaseResponse(c, false, err.Msg, err.Code)
-		return
-	}
-	//仅本人或管理员允许删除图片
 	user, _ := sUser.GetLoginUser(c)
-	if user == nil || !(oldPic.UserID == user.ID) && !(user.UserRole == "admin") {
-		common.BaseResponse(c, false, "无权限", ecode.NO_AUTH_ERROR)
-		return
-	}
-	if err := sPicture.DeletePictureById(deleReq.Id); err != nil {
+	if err := sPicture.DeletePicture(user, &deleReq); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return
 	}
@@ -131,7 +126,7 @@ func DeletePicture(c *gin.Context) {
 }
 
 // UpdatePicture godoc
-// @Summary      更新图片
+// @Summary      更新图片「登录校验」
 // @Description  若图片不存在，则返回false
 // @Tags         picture
 // @Accept       json
@@ -200,6 +195,14 @@ func GetPictureVOById(c *gin.Context) {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
+	//空间权限校验
+	if pic.SpaceID != 0 {
+		loginUser, _ := sUser.GetLoginUser(c)
+		if loginUser == nil || sPicture.CheckPictureAuth(loginUser, pic) != nil {
+			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+			return
+		}
+	}
 	picVO := sPicture.GetPictureVO(pic)
 	common.Success(c, *picVO)
 }
@@ -244,8 +247,29 @@ func ListPictureVOByPage(c *gin.Context) {
 		common.BaseResponse(c, nil, "最多只允许获取20张/页", ecode.PARAMS_ERROR)
 		return
 	}
-	//普通用户默认只允许查询过审图片
-	queryReq.ReviewStatus = consts.PASS
+	//空间权限校验
+	if queryReq.SpaceID != 0 {
+		//私有空间
+		loginUser, err := sUser.GetLoginUser(c)
+		if err != nil {
+			common.BaseResponse(c, nil, err.Msg, err.Code)
+			return
+		}
+		space, err := sSpace.GetSpaceById(queryReq.SpaceID)
+		if err != nil {
+			common.BaseResponse(c, nil, err.Msg, err.Code)
+			return
+		}
+		if space.UserID != loginUser.ID {
+			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+			return
+		}
+	} else {
+		//公开图库
+		//普通用户默认只允许查询过审图片
+		queryReq.ReviewStatus = consts.PASS
+		queryReq.IsNullSpaceID = true
+	}
 	//获取分页查询对象
 	pics, err := sPicture.ListPictureVOByPage(&queryReq)
 	if err != nil {
@@ -272,8 +296,29 @@ func ListPictureVOByPageWithCache(c *gin.Context) {
 		common.BaseResponse(c, nil, "最多只允许获取20张/页", ecode.PARAMS_ERROR)
 		return
 	}
-	//普通用户默认只允许查询过审图片
-	queryReq.ReviewStatus = consts.PASS
+	//空间权限校验
+	if queryReq.SpaceID != 0 {
+		//私有空间
+		loginUser, err := sUser.GetLoginUser(c)
+		if err != nil {
+			common.BaseResponse(c, nil, err.Msg, err.Code)
+			return
+		}
+		space, err := sSpace.GetSpaceById(queryReq.SpaceID)
+		if err != nil {
+			common.BaseResponse(c, nil, err.Msg, err.Code)
+			return
+		}
+		if space.UserID != loginUser.ID {
+			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+			return
+		}
+	} else {
+		//公开图库
+		//普通用户默认只允许查询过审图片
+		queryReq.ReviewStatus = consts.PASS
+		queryReq.IsNullSpaceID = true
+	}
 	//获取分页查询对象
 	pics, err := sPicture.ListPictureVOByPageWithCache(&queryReq)
 	if err != nil {
@@ -284,7 +329,7 @@ func ListPictureVOByPageWithCache(c *gin.Context) {
 }
 
 // EditPicture godoc
-// @Summary      更新图片
+// @Summary      编辑图片
 // @Description  若图片不存在，则返回false
 // @Tags         picture
 // @Accept       json

@@ -235,3 +235,15 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 	}
 	return space.ID, nil
 }
+
+// 根据ID获取空间，若不存在返回错误
+func (s *SpaceService) GetSpaceById(id uint64) (*entity.Space, *ecode.ErrorWithCode) {
+	space, err := s.SpaceRepo.GetSpaceById(nil, id)
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	if space == nil {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "空间不存在")
+	}
+	return space, nil
+}

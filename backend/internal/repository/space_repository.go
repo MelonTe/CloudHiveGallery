@@ -21,6 +21,7 @@ func NewSpaceRepository() *SpaceRepository {
 	return &SpaceRepository{db.LoadDB()}
 }
 
+// 若数据库查询失败，返回err，若不存在记录，space为nil
 func (r *SpaceRepository) GetSpaceById(tx *gorm.DB, id uint64) (*entity.Space, error) {
 	if tx == nil {
 		tx = r.db

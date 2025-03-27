@@ -118,7 +118,7 @@ const docTemplate = `{
                 "tags": [
                     "picture"
                 ],
-                "summary": "根据ID软删除图片",
+                "summary": "根据ID软删除图片「登录校验」",
                 "parameters": [
                     {
                         "description": "图片的ID",
@@ -170,7 +170,7 @@ const docTemplate = `{
                 "tags": [
                     "picture"
                 ],
-                "summary": "更新图片",
+                "summary": "编辑图片",
                 "parameters": [
                     {
                         "description": "需要更新的图片信息",
@@ -564,7 +564,7 @@ const docTemplate = `{
                 "tags": [
                     "picture"
                 ],
-                "summary": "更新图片",
+                "summary": "更新图片「登录校验」",
                 "parameters": [
                     {
                         "description": "需要更新的图片信息",
@@ -629,6 +629,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "图片的ID，非必需",
                         "name": "id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "图片的上传空间ID，非必需",
+                        "name": "spaceId",
                         "in": "formData"
                     }
                 ],
@@ -1775,6 +1781,10 @@ const docTemplate = `{
                 "introduction": {
                     "type": "string"
                 },
+                "isNullSpaceId": {
+                    "description": "是否查询空间ID为空的图片",
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1821,6 +1831,11 @@ const docTemplate = `{
                 "sortOrder": {
                     "description": "排序顺序（默认升序）",
                     "type": "string"
+                },
+                "spaceId": {
+                    "description": "新增空间筛选字段",
+                    "type": "string",
+                    "example": ""
                 },
                 "tags": {
                     "type": "array",
@@ -1927,6 +1942,11 @@ const docTemplate = `{
                 "picName": {
                     "description": "图片名称",
                     "type": "string"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
                 }
             }
         },
