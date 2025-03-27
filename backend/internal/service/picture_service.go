@@ -50,7 +50,24 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	if PictureUploadRequest.ID != 0 {
 		picId = PictureUploadRequest.ID
 	}
-	//若更新图片，则需要校验图片是否存在
+	var space *entity.Space
+	//校验空间ID是否存在
+	//若存在，则需要校验空间是否存在以及是否有权限上传
+	if PictureUploadRequest.SpaceID != 0 {
+		var err error
+		space, err = repository.NewSpaceRepository().GetSpaceById(nil, PictureUploadRequest.SpaceID)
+		if err != nil {
+			return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库异常")
+		}
+		if space == nil {
+			return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
+		}
+		//仅允许空间管理员上传图片
+		if space.UserID != loginUser.ID {
+			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+		}
+	}
+	//若更新图片，则需要校验图片是否存在，以及空间id是否跟原本的一致
 	if picId != 0 {
 		oldpic, err := s.PictureRepo.FindById(nil, picId)
 		if err != nil {
@@ -63,9 +80,25 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		if loginUser.UserRole != consts.ADMIN_ROLE && loginUser.ID != oldpic.UserID {
 			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "权限不足")
 		}
+		//校验空间是否一致
+		if space != nil && oldpic.SpaceID != PictureUploadRequest.SpaceID {
+			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "空间不一致")
+		}
+		//没传spaceID，则复用原有图片的spaceID（兼容了公共图库）
+		if space == nil {
+			PictureUploadRequest.SpaceID = oldpic.SpaceID
+		}
 	}
 	//上传图片，得到信息
-	uploadPathPrefix := fmt.Sprintf("public/%d", loginUser.ID)
+	//去要区分上传到公共图库还是私人图库
+	var uploadPathPrefix string
+	if PictureUploadRequest.SpaceID == 0 {
+		uploadPathPrefix = fmt.Sprintf("public/%d", loginUser.ID)
+	} else {
+		//存在space，则上传到私人图库
+		uploadPathPrefix = fmt.Sprintf("space/%d", PictureUploadRequest.SpaceID)
+	}
+
 	var info *file.UploadPictureResult
 	var err *ecode.ErrorWithCode
 	//根据参数的不同类型，调用不同的方法。请保证传入的正确性。
@@ -92,6 +125,7 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		PicFormat:    info.PicFormat,
 		UserID:       loginUser.ID,
 		EditTime:     time.Now(),
+		SpaceID:      PictureUploadRequest.SpaceID, //指定空间id
 	}
 	//补充审核校验参数
 	s.FillReviewParamsInPic(pic, loginUser)
@@ -154,6 +188,12 @@ func (s *PictureService) GetQueryWrapper(db *gorm.DB, req *reqPicture.PictureQue
 	}
 	if req.ReviewerID != 0 {
 		query = query.Where("reviewer_id = ?", req.ReviewerID)
+	}
+	if req.SpaceID != 0 {
+		query = query.Where("space_id = ?", req.SpaceID)
+	}
+	if req.IsNullSpaceID {
+		query = query.Where("space_id IS NULL")
 	}
 	//tags在数据库中的存储格式：["golang","java","c++"]
 	if len(req.Tags) > 0 {
@@ -244,10 +284,19 @@ func (s *PictureService) GetPictureById(id uint64) (*entity.Picture, *ecode.Erro
 	return Picture, nil
 }
 
-// 根据ID删除图片
-func (s *PictureService) DeletePictureById(id uint64) *ecode.ErrorWithCode {
-	err := s.PictureRepo.DeleteById(nil, id)
+// 删除图片，会校验权限
+func (s *PictureService) DeletePicture(loginUser *entity.User, deleReq *common.DeleteRequest) *ecode.ErrorWithCode {
+	//判断id图片是否存在
+	oldPic, err := s.GetPictureById(deleReq.Id)
 	if err != nil {
+		return err
+	}
+	//权限校验
+	if err := s.CheckPictureAuth(loginUser, oldPic); err != nil {
+		return err
+	}
+	errr := s.PictureRepo.DeleteById(nil, deleReq.Id)
+	if errr != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	return nil
@@ -261,8 +310,8 @@ func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateReques
 		return err
 	}
 	//权限校验
-	if !(oldPic.UserID == loginUser.ID) && !(loginUser.UserRole == "admin") {
-		return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "无权限")
+	if err := s.CheckPictureAuth(loginUser, oldPic); err != nil {
+		return err
 	}
 	//校验图片参数
 	oldPic.Name = updateReq.Name
@@ -526,4 +575,22 @@ func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBat
 		return uploadCount < req.Count
 	})
 	return uploadCount, nil
+}
+
+//增加的空间逻辑
+
+// 校验操作图片权限，公共图库仅本人或管理员可以操作，私人图库仅空间管理员可以操作
+func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entity.Picture) *ecode.ErrorWithCode {
+	//公共图库，仅本人或管理员可以操作
+	if picture.SpaceID == 0 {
+		if loginUser.ID != picture.UserID && loginUser.UserRole != consts.ADMIN_ROLE {
+			return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
+		}
+	} else {
+		//私人图库，仅空间管理员可以操作
+		if picture.UserID != loginUser.ID {
+			return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
+		}
+	}
+	return nil
 }

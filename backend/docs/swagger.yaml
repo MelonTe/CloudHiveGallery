@@ -184,6 +184,9 @@ definitions:
         type: string
       introduction:
         type: string
+      isNullSpaceId:
+        description: 是否查询空间ID为空的图片
+        type: boolean
       name:
         type: string
       pageSize:
@@ -217,6 +220,10 @@ definitions:
         type: string
       sortOrder:
         description: 排序顺序（默认升序）
+        type: string
+      spaceId:
+        description: 新增空间筛选字段
+        example: ""
         type: string
       tags:
         items:
@@ -291,6 +298,10 @@ definitions:
         type: string
       picName:
         description: 图片名称
+        type: string
+      spaceId:
+        description: 空间ID
+        example: ""
         type: string
     type: object
   picture.PictureVO:
@@ -707,7 +718,7 @@ paths:
           description: 删除失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 根据ID软删除图片
+      summary: 根据ID软删除图片「登录校验」
       tags:
       - picture
   /v1/picture/edit:
@@ -738,7 +749,7 @@ paths:
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 更新图片
+      summary: 编辑图片
       tags:
       - picture
   /v1/picture/get:
@@ -970,7 +981,7 @@ paths:
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 更新图片
+      summary: 更新图片「登录校验」
       tags:
       - picture
   /v1/picture/upload:
@@ -987,6 +998,10 @@ paths:
       - description: 图片的ID，非必需
         in: formData
         name: id
+        type: string
+      - description: 图片的上传空间ID，非必需
+        in: formData
+        name: spaceId
         type: string
       produces:
       - application/json
