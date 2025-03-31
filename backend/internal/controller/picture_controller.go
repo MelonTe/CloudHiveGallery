@@ -218,8 +218,6 @@ func GetPictureVOById(c *gin.Context) {
 // @Router       /v1/picture/list/page [POST]
 func ListPictureByPage(c *gin.Context) {
 	queryReq := reqPicture.PictureQueryRequest{}
-	//管理员可以查看所有图片
-	queryReq.ReviewStatus = consts.ALL
 	c.ShouldBind(&queryReq)
 	//获取分页查询对象
 	pics, err := sPicture.ListPictureByPage(&queryReq)
@@ -267,7 +265,10 @@ func ListPictureVOByPage(c *gin.Context) {
 	} else {
 		//公开图库
 		//普通用户默认只允许查询过审图片
-		queryReq.ReviewStatus = consts.PASS
+		if queryReq.ReviewStatus == nil {
+			queryReq.ReviewStatus = new(int) //创建指针
+		}
+		*queryReq.ReviewStatus = consts.PASS
 		queryReq.IsNullSpaceID = true
 	}
 	//获取分页查询对象
@@ -316,7 +317,10 @@ func ListPictureVOByPageWithCache(c *gin.Context) {
 	} else {
 		//公开图库
 		//普通用户默认只允许查询过审图片
-		queryReq.ReviewStatus = consts.PASS
+		if queryReq.ReviewStatus == nil {
+			queryReq.ReviewStatus = new(int) //创建指针
+		}
+		*queryReq.ReviewStatus = consts.PASS
 		queryReq.IsNullSpaceID = true
 	}
 	//获取分页查询对象

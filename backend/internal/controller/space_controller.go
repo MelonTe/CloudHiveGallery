@@ -2,10 +2,12 @@ package controller
 
 import (
 	"chg/internal/common"
+	"chg/internal/consts"
 	"chg/internal/ecode"
 	reqSpace "chg/internal/model/request/space"
 	resSpace "chg/internal/model/response/space"
 	"chg/internal/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,12 +55,12 @@ func UpdateSpace(c *gin.Context) {
 // @Tags         space
 // @Accept       json
 // @Produce      json
-// @Param		request body reqSpace.SpaceUpdateRequest true "需要更新的空间信息"
+// @Param		request body reqSpace.SpaceEditRequest true "需要更新的空间信息"
 // @Success      200  {object}  common.Response{data=bool} "更新成功"
 // @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
 // @Router       /v1/space/edit [POST]
 func EditSpace(c *gin.Context) {
-	updateReq := reqSpace.SpaceUpdateRequest{}
+	updateReq := reqSpace.SpaceEditRequest{}
 	if err := c.ShouldBind(&updateReq); err != nil {
 		common.BaseResponse(c, false, "参数绑定失败", ecode.PARAMS_ERROR)
 		return
@@ -73,7 +75,7 @@ func EditSpace(c *gin.Context) {
 		common.BaseResponse(c, false, "未登录", ecode.NOT_LOGIN_ERROR)
 		return
 	}
-	if err := sSpace.UpdateSpace(&updateReq, loginUser); err != nil {
+	if err := sSpace.EditSpace(&updateReq, loginUser); err != nil {
 		common.BaseResponse(c, false, err.Msg, err.Code)
 		return
 	}
@@ -128,6 +130,29 @@ func ListSpaceVOByPage(c *gin.Context) {
 	common.Success(c, *pics)
 }
 
+// GetSpaceVOById godoc
+// @Summary      获取当个空间的视图信息
+// @Tags         space
+// @Accept       json
+// @Produce      json
+// @Param		id query string true "空间的ID"
+// @Success      200  {object}  common.Response{data=resSpace.SpaceVO} "获取成功"
+// @Failure      400  {object}  common.Response "查询失败，详情见响应中的code"
+// @Router       /v1/space/get/vo [GET]
+func GetSpaceVOById(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Query("id"), 10, 64)
+	if id <= 0 {
+		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
+		return
+	}
+	space, err := sSpace.GetSpaceById(id)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, *space)
+}
+
 // AddSpace godoc
 // @Summary      增加空间「需要登录」
 // @Tags         space
@@ -151,4 +176,25 @@ func AddSpace(c *gin.Context) {
 		return
 	}
 	common.Success(c, spaceId)
+}
+
+// ListSpaceLevel godoc
+// @Summary      获取所有的空间等级信息
+// @Tags         space
+// @Produce      json
+// @Success      200  {object}  common.Response{data=[]resSpace.SpaceLevelResponse} "返回所有空间等级信息数组"
+// @Failure      400  {object}  common.Response "查询失败，详情见响应中的code"
+// @Router       /v1/space/list/level [GET]
+func ListSpaceLevel(c *gin.Context) {
+	res := []resSpace.SpaceLevelResponse{}
+	for i := consts.FirstSpaceLevel; i <= consts.LastSpaceLevel; i++ {
+		spaceLevel := consts.GetSpaceLevelByValue(i)
+		res = append(res, resSpace.SpaceLevelResponse{
+			Value:    i,
+			Text:     spaceLevel.Text,
+			MaxCount: spaceLevel.MaxCount,
+			MaxSize:  spaceLevel.MaxSize,
+		})
+	}
+	common.Success(c, res)
 }

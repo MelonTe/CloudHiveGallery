@@ -66,6 +66,13 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		if space.UserID != loginUser.ID {
 			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
 		}
+		//校验额度
+		if space.TotalCount >= space.MaxCount {
+			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "空间图片数量已满")
+		}
+		if space.TotalSize >= space.MaxSize {
+			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "空间图片大小已满")
+		}
 	}
 	//若更新图片，则需要校验图片是否存在，以及空间id是否跟原本的一致
 	if picId != 0 {
@@ -133,9 +140,27 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	if picId != 0 {
 		pic.ID = picId
 	}
+	//开启事务
+	tx := s.PictureRepo.BeginTransaction()
 	//进行插入或者更新操作，即save
-	errr := s.PictureRepo.SavePicture(nil, pic)
+	errr := s.PictureRepo.SavePicture(tx, pic)
 	if errr != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	//修改空间的额度
+	if space != nil {
+		//设置更新字段
+		updateMap := make(map[string]interface{}, 2)
+		updateMap["total_count"] = gorm.Expr("total_count + 1")
+		updateMap["total_size"] = gorm.Expr("total_size + ?", pic.PicSize)
+		err := NewSpaceService().SpaceRepo.UpdateSpaceById(tx, space.ID, updateMap)
+		if err != nil {
+			return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+		}
+	}
+	//提交事务
+	errr = tx.Commit().Error
+	if err != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	userVO := resUser.GetUserVO(*loginUser)
@@ -180,8 +205,8 @@ func (s *PictureService) GetQueryWrapper(db *gorm.DB, req *reqPicture.PictureQue
 		query = query.Where("pic_scale = ?", req.PicScale)
 	}
 	//补充审核字段条件
-	if consts.ReviewValueExist(req.ReviewStatus) {
-		query = query.Where("review_status = ?", req.ReviewStatus)
+	if req.ReviewStatus != nil {
+		query = query.Where("review_status = ?", *req.ReviewStatus)
 	}
 	if req.ReviewMessage != "" {
 		query = query.Where("review_message LIKE ?", "%"+req.ReviewMessage+"%")
@@ -295,8 +320,34 @@ func (s *PictureService) DeletePicture(loginUser *entity.User, deleReq *common.D
 	if err := s.CheckPictureAuth(loginUser, oldPic); err != nil {
 		return err
 	}
-	errr := s.PictureRepo.DeleteById(nil, deleReq.Id)
+	//开启事务
+	tx := s.PictureRepo.BeginTransaction()
+	//进行删除图片操作
+	errr := s.PictureRepo.DeleteById(tx, deleReq.Id)
 	if errr != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	var space *entity.Space
+	if oldPic.SpaceID != 0 {
+		space, errr = repository.NewSpaceRepository().GetSpaceById(nil, oldPic.SpaceID)
+		if errr != nil {
+			return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+		}
+	}
+	//修改空间的额度
+	if space != nil {
+		//设置更新字段
+		updateMap := make(map[string]interface{}, 2)
+		updateMap["total_count"] = gorm.Expr("total_count - 1")
+		updateMap["total_size"] = gorm.Expr("total_size - ?", oldPic.PicSize)
+		err := NewSpaceService().SpaceRepo.UpdateSpaceById(tx, space.ID, updateMap)
+		if err != nil {
+			return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+		}
+	}
+	//提交事务
+	errr = tx.Commit().Error
+	if err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	return nil
@@ -458,8 +509,7 @@ func (s *PictureService) ListPictureVOByPageWithCache(req *reqPicture.PictureQue
 // 图片审核功能，需要记录审核用户
 func (s *PictureService) DoPictureReview(req *reqPicture.PictureReviewRequest, user *entity.User) *ecode.ErrorWithCode {
 	//校验参数
-	reviewStatus := consts.ReviewValueExist(req.ReviewStatus)
-	if req.ID == 0 || !reviewStatus {
+	if req.ID == 0 || req.ReviewStatus == nil || !consts.ReviewValueExist(*req.ReviewStatus) {
 		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数错误")
 	}
 	//判断图片是否存在
@@ -472,14 +522,14 @@ func (s *PictureService) DoPictureReview(req *reqPicture.PictureReviewRequest, u
 	}
 	//校验审核状态是否重复
 	//若当前请求的状态，和图片原有状态一致，返回重复审核异常
-	if oldPic.ReviewStatus == req.ReviewStatus {
+	if oldPic.ReviewStatus == *req.ReviewStatus {
 		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "请勿重复审核")
 	}
 	//数据库操作
 
 	//记录要更新的值，防止全部更新效率过低
 	updateMap := make(map[string]interface{}, 8)
-	updateMap["review_status"] = req.ReviewStatus
+	updateMap["review_status"] = *req.ReviewStatus
 	updateMap["reviewer_id"] = user.ID
 	updateMap["review_time"] = time.Now()
 	updateMap["review_message"] = req.ReviewMessage

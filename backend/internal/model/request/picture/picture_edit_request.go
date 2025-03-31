@@ -7,4 +7,5 @@ type PictureEditRequest struct {
 	Introduction string   `json:"introduction"`
 	Category     string   `json:"category"`
 	Tags         []string `json:"tags"`
+	SpaceId      uint64   `json:"spaceId,string" swaggertype:"string"` //空间ID
 }

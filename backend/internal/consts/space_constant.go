@@ -2,10 +2,10 @@ package consts
 
 // SpaceLevel 表示空间等级及其属性。
 type SpaceLevel struct {
-	Text     string // 等级名称
-	Value    int    // 等级值
-	MaxCount int64  // 最大图片数量
-	MaxSize  int64  // 最大图片总大小（字节）
+	Value    int    `json:"value"`    //空间的等级
+	Text     string `json:"text"`     //空间的等级名称
+	MaxCount int64  `json:"maxCount"` //空间图片的最大数量
+	MaxSize  int64  `json:"maxSize"`  //空间图片的最大总大小，单位是Byte
 }
 
 // 定义每个空间等级及其属性。
@@ -28,6 +28,8 @@ var (
 		MaxCount: 10000,               // 最大图片数量为 10000
 		MaxSize:  10000 * 1024 * 1024, // 最大图片总大小为 10000MB
 	}
+	FirstSpaceLevel = COMMON.Value   // 默认的空间等级为普通版
+	LastSpaceLevel  = FLAGSHIP.Value // 最高的空间等级为旗舰版
 )
 
 // GetSpaceLevelByValue 根据等级值获取对应的 SpaceLevel。

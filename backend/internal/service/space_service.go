@@ -93,8 +93,32 @@ func (s *SpaceService) UpdateSpace(space *reqSpace.SpaceUpdateRequest, loginUser
 	//填充数据
 	updateMap["space_name"] = space.SpaceName
 	updateMap["space_level"] = space.SpaceLevel
-	updateMap["edit_time"] = time.Now()
 	s.FillSpaceByLevelInMap(space.SpaceLevel, updateMap)
+	//更新数据库数据
+	if err := s.SpaceRepo.UpdateSpaceById(nil, space.ID, updateMap); err != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "更新失败")
+	}
+	return nil
+}
+
+// 编辑空间
+func (s *SpaceService) EditSpace(space *reqSpace.SpaceEditRequest, loginUser *entity.User) *ecode.ErrorWithCode {
+	//查找旧的空间，校验是否存在
+	oldSpace, err := s.SpaceRepo.GetSpaceById(nil, space.ID)
+	if err != nil {
+		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "数据库查询失败")
+	}
+	if oldSpace == nil {
+		return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "空间不存在")
+	}
+	//权限校验
+	if !(oldSpace.UserID == loginUser.ID) {
+		return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "无权限")
+	}
+	updateMap := make(map[string]interface{}, 8)
+	//填充数据
+	updateMap["space_name"] = space.SpaceName
+	updateMap["edit_time"] = time.Now()
 	//更新数据库数据
 	if err := s.SpaceRepo.UpdateSpaceById(nil, space.ID, updateMap); err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "更新失败")
@@ -176,7 +200,9 @@ func (s *SpaceService) GetQueryWrapper(db *gorm.DB, req *reqSpace.SpaceQueryRequ
 	if req.SpaceName != "" {
 		query = query.Where("space_name LIKE ?", "%"+req.SpaceName+"%")
 	}
-	query = query.Where("space_level = ?", req.SpaceLevel)
+	if req.SpaceLevel != nil {
+		query = query.Where("space_level = ?", *req.SpaceLevel)
+	}
 	if req.SortField != "" {
 		sortOrder := "ASC"
 		if req.SortOrder == "descend" {
