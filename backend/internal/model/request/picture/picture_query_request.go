@@ -17,7 +17,7 @@ type PictureQueryRequest struct {
 	SearchText   string   `json:"searchText"`                         //搜索词
 	common.PageRequest
 	//新增审核字段
-	ReviewStatus  int    `json:"reviewStatus,string" swaggertype:"string"` //审核状态
+	ReviewStatus  *int   `json:"reviewStatus,string" swaggertype:"string"` //审核状态
 	ReviewerID    uint64 `json:"reviewerId,string" swaggertype:"string"`   //审核人ID
 	ReviewMessage string `json:"reviewMessage"`
 	//新增空间筛选字段

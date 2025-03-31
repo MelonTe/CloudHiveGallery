@@ -25,6 +25,7 @@ type PictureVO struct {
 	CreateTime   time.Time      `json:"createTime"`
 	UpdateTime   time.Time      `json:"updateTime"`
 	User         resUser.UserVO `json:"user" comment:"用户信息"`
+	SpaceID      uint64         `json:"spaceId,string" comment:"空间ID"`
 }
 
 // 封装类转化为数据库对象
@@ -48,6 +49,7 @@ func VOToEntity(vo PictureVO) entity.Picture {
 		EditTime:     vo.EditTime,
 		CreateTime:   vo.CreateTime,
 		UpdateTime:   vo.UpdateTime,
+		SpaceID:      vo.SpaceID,
 	}
 }
 
@@ -74,5 +76,6 @@ func EntityToVO(entity entity.Picture, userVO resUser.UserVO) PictureVO {
 		CreateTime:   entity.CreateTime,
 		UpdateTime:   entity.UpdateTime,
 		User:         userVO,
+		SpaceID:      entity.SpaceID,
 	}
 }

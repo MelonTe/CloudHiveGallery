@@ -832,7 +832,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/space.SpaceUpdateRequest"
+                            "$ref": "#/definitions/space.SpaceEditRequest"
                         }
                     }
                 ],
@@ -857,6 +857,95 @@
                     },
                     "400": {
                         "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/get/vo": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "获取当个空间的视图信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "空间的ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/space.SpaceVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/list/level": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space"
+                ],
+                "summary": "获取所有的空间等级信息",
+                "responses": {
+                    "200": {
+                        "description": "返回所有空间等级信息数组",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/space.SpaceLevelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
                         }
@@ -1748,6 +1837,11 @@
                 "name": {
                     "type": "string"
                 },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -1895,6 +1989,11 @@
                 "name": {
                     "type": "string"
                 },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -1979,6 +2078,10 @@
                 },
                 "picWidth": {
                     "type": "integer"
+                },
+                "spaceId": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "tags": {
                     "type": "array",
@@ -2071,6 +2174,41 @@
                 }
             }
         },
+        "space.SpaceEditRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Space ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceName": {
+                    "description": "Space name",
+                    "type": "string"
+                }
+            }
+        },
+        "space.SpaceLevelResponse": {
+            "type": "object",
+            "properties": {
+                "maxCount": {
+                    "description": "空间图片的最大数量",
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "description": "空间图片的最大总大小",
+                    "type": "integer"
+                },
+                "text": {
+                    "description": "空间的等级名称",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "空间的等级",
+                    "type": "integer"
+                }
+            }
+        },
         "space.SpaceQueryRequest": {
             "type": "object",
             "properties": {
@@ -2096,7 +2234,7 @@
                     "type": "string"
                 },
                 "spaceLevel": {
-                    "description": "空间级别：0-普通版 1-专业版 2-旗舰版",
+                    "description": "空间级别：0-普通版 1-专业版 2-旗舰版 使用指针来区分0和未传参",
                     "type": "integer"
                 },
                 "spaceName": {

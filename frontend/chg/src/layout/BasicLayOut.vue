@@ -4,10 +4,13 @@
             <a-layout-header class="header">
                 <GlobalHeader />
             </a-layout-header>
+          <a-layout>
+            <GlobalSider class="sider" />
             <a-layout-content class="content">
-                <router-view></router-view>
+              <router-view />
             </a-layout-content>
-            <a-layout-footer class="footer">
+          </a-layout>
+          <a-layout-footer class="footer">
                 CloudHiveGallery made By：MelonTe
             </a-layout-footer>
         </a-layout>
@@ -16,18 +19,12 @@
 
 <script setup lang="ts">
 import GlobalHeader from '@/components/GlobalHeader.vue';
+import GlobalSider from '@/components/GlobalSider.vue'
 
 
 </script>
 
 <style scoped>
-#basicLayout .header {
-    background: white;
-    color: unset;
-    margin-bottom: 16px;
-    padding-inline: 20px;
-}
-
 #basicLayout .content {
     padding: 20px;
     background: linear-gradient(to right, #fcfcfc, #ffffff);
@@ -43,4 +40,27 @@ import GlobalHeader from '@/components/GlobalHeader.vue';
     right: 0;
     text-align: center;
 }
+
+#basicLayout .header {
+  margin-bottom: 1px;
+  background: white;
+  color: unset;
+  padding-inline: 20px;
+}
+
+#basicLayout .content {
+  padding: 28px;
+}
+
+#basicLayout .sider {
+  background: #fff;
+  padding-top: 20px;
+  border-right: 0.5px solid #eee;
+}
+
+#basicLayout :deep(.ant-menu-root) {
+  border-bottom: none !important;
+  border-inline-end: none !important;
+}
+
 </style>

@@ -113,7 +113,6 @@
 import dayjs from 'dayjs'
 import {
   postPictureListPage,
-  postPictureListPageVo,
   postPictureOpenApiDelete,
   postPictureReview,
 } from '@/api/picture'
@@ -158,6 +157,11 @@ const columns = [
   {
     title: '用户 id',
     dataIndex: 'userId',
+    width: 80,
+  },
+  {
+    title: '空间 id',
+    dataIndex: 'spaceId',
     width: 80,
   },
   {
@@ -210,6 +214,7 @@ const pagination = computed(() => {
 const fetchData = async () => {
   const res = await postPictureListPage({
     ...searchParams,
+    isNullSpaceId: true,
   })
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []

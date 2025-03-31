@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { postUserLogin, postUserLogout } from '@/api/user'
+import { postUserLogin } from '@/api/user'
 import router from '@/router';
 import { useLoginUserStore } from '@/stores/useLoginUserStore';
 import { message } from 'ant-design-vue';

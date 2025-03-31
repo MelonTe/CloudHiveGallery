@@ -55,6 +55,8 @@ func RegisterV1Routes(r *gin.Engine) {
 			spaceAPI.POST("/list/page", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.ListSpaceByPage)
 			spaceAPI.POST("/list/page/vo", controller.ListSpaceVOByPage)
 			spaceAPI.POST("/add", middleware.LoginCheck(service.NewUserService()), controller.AddSpace)
+			spaceAPI.GET("/list/level", controller.ListSpaceLevel)
+			spaceAPI.GET("/get/vo", controller.GetSpaceVOById)
 		}
 	}
 

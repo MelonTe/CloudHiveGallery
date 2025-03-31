@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from '@/request'
 
-/** 根据ID软删除图片 POST /v1/picture/delete */
+/** 根据ID软删除图片「登录校验」 POST /v1/picture/delete */
 export async function postPictureOpenApiDelete(
   body: API.DeleteRequest,
   options?: { [key: string]: any }
@@ -17,7 +17,7 @@ export async function postPictureOpenApiDelete(
   })
 }
 
-/** 更新图片 若图片不存在，则返回false POST /v1/picture/edit */
+/** 编辑图片 若图片不存在，则返回false POST /v1/picture/edit */
 export async function postPictureEdit(
   body: API.PictureEditRequest,
   options?: { [key: string]: any }
@@ -133,7 +133,7 @@ export async function getPictureTagCategory(options?: { [key: string]: any }) {
   })
 }
 
-/** 更新图片 若图片不存在，则返回false POST /v1/picture/update */
+/** 更新图片「登录校验」 若图片不存在，则返回false POST /v1/picture/update */
 export async function postPictureUpdate(
   body: API.PictureUpdateRequest,
   options?: { [key: string]: any }
@@ -153,6 +153,8 @@ export async function postPictureUpload(
   body: {
     /** 图片的ID，非必需 */
     id?: string
+    /** 图片的上传空间ID，非必需 */
+    spaceId?: string
   },
   file?: File,
   options?: { [key: string]: any }

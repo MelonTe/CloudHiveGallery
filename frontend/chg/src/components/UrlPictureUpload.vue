@@ -17,7 +17,7 @@ import { postPictureUploadUrl } from '@/api/picture.ts'
 
 interface Props {
   picture?: API.PictureVO
-  spaceId?: number
+  spaceId?: string
   onSuccess?: (newPicture: API.PictureVO) => void
 }
 const loading = ref<boolean>(false);
@@ -32,6 +32,7 @@ const handleUpload = async () => {
   loading.value = true
   try {
     const params: API.PictureUploadRequest = { fileUrl: fileUrl.value }
+    params.spaceId = props.spaceId
     if (props.picture) {
       params.id = props.picture.id
     }

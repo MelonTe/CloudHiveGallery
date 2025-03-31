@@ -18,6 +18,11 @@ declare namespace API {
     id: string
   }
 
+  type getSpaceGetVoParams = {
+    /** 空间的ID */
+    id: string
+  }
+
   type getUserGetParams = {
     /** 用户的ID */
     id: string
@@ -52,6 +57,30 @@ declare namespace API {
     total?: number
   }
 
+  type ListSpaceResponse = {
+    /** 当前页数 */
+    current?: number
+    /** 总页数 */
+    pages?: number
+    records?: Space[]
+    /** 页面大小 */
+    size?: number
+    /** 总记录数 */
+    total?: number
+  }
+
+  type ListSpaceVOResponse = {
+    /** 当前页数 */
+    current?: number
+    /** 总页数 */
+    pages?: number
+    records?: SpaceVO[]
+    /** 页面大小 */
+    size?: number
+    /** 总记录数 */
+    total?: number
+  }
+
   type ListUserVOResponse = {
     /** 当前页数 */
     current?: number
@@ -80,6 +109,7 @@ declare namespace API {
     reviewStatus?: number
     reviewTime?: string
     reviewerId?: string
+    spaceId?: string
     /** 存储的格式：["golang","java","c++"] */
     tags?: string
     thumbnailUrl?: string
@@ -93,6 +123,8 @@ declare namespace API {
     id?: string
     introduction?: string
     name?: string
+    /** 空间ID */
+    spaceId?: string
     tags?: string[]
   }
 
@@ -103,6 +135,8 @@ declare namespace API {
     /** 图片ID */
     id?: string
     introduction?: string
+    /** 是否查询空间ID为空的图片 */
+    isNullSpaceId?: boolean
     name?: string
     /** 页面大小 */
     pageSize?: number
@@ -122,6 +156,8 @@ declare namespace API {
     sortField?: string
     /** 排序顺序（默认升序） */
     sortOrder?: string
+    /** 新增空间筛选字段 */
+    spaceId?: string
     tags?: string[]
     /** 图片上传人信息 */
     userId?: string
@@ -146,6 +182,8 @@ declare namespace API {
     id?: string
     introduction?: string
     name?: string
+    /** 空间ID */
+    spaceId?: string
     tags?: string[]
   }
 
@@ -165,6 +203,8 @@ declare namespace API {
     id?: string
     /** 图片名称 */
     picName?: string
+    /** 空间ID */
+    spaceId?: string
   }
 
   type PictureVO = {
@@ -179,6 +219,7 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    spaceId?: string
     tags?: string[]
     thumbnailUrl?: string
     updateTime?: string
@@ -191,6 +232,94 @@ declare namespace API {
     code?: number
     data?: Record<string, any>
     msg?: string
+  }
+
+  type Space = {
+    createTime?: string
+    editTime?: string
+    id?: string
+    maxCount?: number
+    maxSize?: number
+    spaceLevel?: number
+    spaceName?: string
+    totalCount?: number
+    totalSize?: number
+    updateTime?: string
+    userId?: string
+  }
+
+  type SpaceAddRequest = {
+    /** 空间级别：0-普通版 1-专业版 2-旗舰版 */
+    spaceLevel?: number
+    /** 空间名称 */
+    spaceName?: string
+  }
+
+  type SpaceEditRequest = {
+    /** Space ID */
+    id?: string
+    /** Space name */
+    spaceName?: string
+  }
+
+  type SpaceLevelResponse = {
+    /** 空间图片的最大数量 */
+    maxCount?: number
+    /** 空间图片的最大总大小 */
+    maxSize?: number
+    /** 空间的等级名称 */
+    text?: string
+    /** 空间的等级 */
+    value?: number
+  }
+
+  type SpaceQueryRequest = {
+    /** 当前页数 */
+    current?: number
+    /** 空间 ID */
+    id?: string
+    /** 页面大小 */
+    pageSize?: number
+    /** 排序字段 */
+    sortField?: string
+    /** 排序顺序（默认升序） */
+    sortOrder?: string
+    /** 空间级别：0-普通版 1-专业版 2-旗舰版 使用指针来区分0和未传参 */
+    spaceLevel?: number
+    /** 空间名称 */
+    spaceName?: string
+    /** 用户 ID */
+    userId?: string
+  }
+
+  type SpaceUpdateRequest = {
+    /** Space ID */
+    id?: string
+    /** Maximum number of space images */
+    maxCount?: number
+    /** Maximum total size of space images */
+    maxSize?: number
+    /** Space level: 0-普通版 1-专业版 2-旗舰版 */
+    spaceLevel?: number
+    /** Space name */
+    spaceName?: string
+  }
+
+  type SpaceVO = {
+    createTime?: string
+    editTime?: string
+    /** Space ID */
+    id?: string
+    maxCount?: number
+    maxSize?: number
+    spaceLevel?: number
+    spaceName?: string
+    totalCount?: number
+    totalSize?: number
+    updateTime?: string
+    user?: UserVO
+    /** User ID */
+    userId?: string
   }
 
   type User = {

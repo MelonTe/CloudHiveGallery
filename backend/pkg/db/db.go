@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -21,7 +22,9 @@ func init() {
 		config.Database.Port,
 		config.Database.Name)
 	var err error
-	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
+	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info), // 设置日志级别为 Info
+	}); err != nil {
 		log.Fatalf("Failed to connect DB, %s", err)
 	}
 	//自动迁移model
