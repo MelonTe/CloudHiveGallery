@@ -4,7 +4,6 @@ import (
 	"chg/cmd"
 	_ "chg/docs"
 	_ "chg/pkg/rds"
-	"math"
 )
 
 // @title           CloudHiveGallery

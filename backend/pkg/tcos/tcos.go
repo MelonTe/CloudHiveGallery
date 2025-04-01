@@ -113,9 +113,9 @@ func PutPicture(f io.Reader, key string) (*cos.Response, error) {
 }
 
 // 上传图片对象并且进行上传时压缩，保存成webp格式，返回原始响应体。
-// 注意，会覆盖原图存储，即最终只会保留webp格式的图片。
+// 原图不会被覆盖。
 // key是对象在存储桶中的唯一标识，例如"doc/test.png"。
-// 同时，会添加一个缩略图。
+// 同时，会添加一个缩略图，会缩略原图至宽高至多为256，参考网址为doc/test_thumbnail.png。
 func PutPictureWithCompress(f io.Reader, key string) (*cos.Response, error) {
 	//取出key的后缀，修改为webp
 	lastIdx := strings.LastIndex(key, ".")
@@ -151,8 +151,6 @@ func PutPictureWithCompress(f io.Reader, key string) (*cos.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	//删除旧图片
-	DeleteObject(key)
 	return res, nil
 }
 

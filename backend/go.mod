@@ -41,6 +41,7 @@ require (
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.62 // indirect
 	golang.org/x/tools v0.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	resty.dev/v3 v3.0.0-beta.2 // indirect
 )
 
 require (

@@ -220,6 +220,13 @@ func (s *PictureService) GetQueryWrapper(db *gorm.DB, req *reqPicture.PictureQue
 	if req.IsNullSpaceID {
 		query = query.Where("space_id IS NULL")
 	}
+	//补充查询图片的编辑时间，StartEditTime<=查找图片<EndEditTime
+	if !req.StartEditTime.IsZero() {
+		query = query.Where("edit_time >= ?", req.StartEditTime)
+	}
+	if !req.EndEditTime.IsZero() {
+		query = query.Where("edit_time < ?", req.EndEditTime)
+	}
 	//tags在数据库中的存储格式：["golang","java","c++"]
 	if len(req.Tags) > 0 {
 		//and (tags LIKE %"commic" and tags LIKE %"manga"% ...)

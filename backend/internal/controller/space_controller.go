@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func dumb() {
+func dumb1() {
 	temp := resSpace.ListSpaceResponse{}
 	_ = temp
 }
