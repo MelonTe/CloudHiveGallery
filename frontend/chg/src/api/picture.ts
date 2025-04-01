@@ -125,6 +125,21 @@ export async function postPictureReview(
   })
 }
 
+/** 根据图片ID搜索图片 POST /v1/picture/search/picture */
+export async function postPictureSearchPicture(
+  body: API.PictureSearchByPictureRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.ImageSearchResult[] }>('/v1/picture/search/picture', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 获取图片的标签和分类（固定） GET /v1/picture/tag_category */
 export async function getPictureTagCategory(options?: { [key: string]: any }) {
   return request<API.Response & { data?: API.PictureTagCategory }>('/v1/picture/tag_category', {

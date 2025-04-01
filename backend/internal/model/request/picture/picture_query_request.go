@@ -1,6 +1,9 @@
 package picture
 
-import "chg/internal/common"
+import (
+	"chg/internal/common"
+	"time"
+)
 
 type PictureQueryRequest struct {
 	ID           uint64   `json:"id,string" swaggertype:"string"` //图片ID
@@ -21,6 +24,8 @@ type PictureQueryRequest struct {
 	ReviewerID    uint64 `json:"reviewerId,string" swaggertype:"string"`   //审核人ID
 	ReviewMessage string `json:"reviewMessage"`
 	//新增空间筛选字段
-	SpaceID       uint64 `json:"spaceId,string" swaggertype:"string"` //空间ID
-	IsNullSpaceID bool   `json:"isNullSpaceId"`                       //是否查询空间ID为空的图片
+	SpaceID       uint64    `json:"spaceId,string" swaggertype:"string"` //空间ID
+	IsNullSpaceID bool      `json:"isNullSpaceId"`                       //是否查询空间ID为空的图片
+	StartEditTime time.Time `json:"startEditTime"`                       //开始编辑时间
+	EndEditTime   time.Time `json:"endEditTime"`                         //结束编辑时间
 }

@@ -33,6 +33,13 @@ declare namespace API {
     id: string
   }
 
+  type ImageSearchResult = {
+    /** 来源地址 */
+    fromURL?: string
+    /** 缩略图地址 */
+    thumbURL?: string
+  }
+
   type ListPictureResponse = {
     /** 当前页数 */
     current?: number
@@ -132,6 +139,8 @@ declare namespace API {
     category?: string
     /** 当前页数 */
     current?: number
+    /** 结束编辑时间 */
+    endEditTime?: string
     /** 图片ID */
     id?: string
     introduction?: string
@@ -158,6 +167,8 @@ declare namespace API {
     sortOrder?: string
     /** 新增空间筛选字段 */
     spaceId?: string
+    /** 开始编辑时间 */
+    startEditTime?: string
     tags?: string[]
     /** 图片上传人信息 */
     userId?: string
@@ -170,6 +181,11 @@ declare namespace API {
     reviewMessage?: string
     /** 审核状态 */
     reviewStatus?: string
+  }
+
+  type PictureSearchByPictureRequest = {
+    /** 图片ID */
+    pictureId?: string
   }
 
   type PictureTagCategory = {

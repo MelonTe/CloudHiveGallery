@@ -117,6 +117,15 @@ definitions:
       userRole:
         type: string
     type: object
+  model.ImageSearchResult:
+    properties:
+      fromURL:
+        description: 来源地址
+        type: string
+      thumbURL:
+        description: 缩略图地址
+        type: string
+    type: object
   picture.ListPictureResponse:
     properties:
       current:
@@ -182,6 +191,9 @@ definitions:
       current:
         description: 当前页数
         type: integer
+      endEditTime:
+        description: 结束编辑时间
+        type: string
       id:
         description: 图片ID
         example: ""
@@ -229,6 +241,9 @@ definitions:
         description: 新增空间筛选字段
         example: ""
         type: string
+      startEditTime:
+        description: 开始编辑时间
+        type: string
       tags:
         items:
           type: string
@@ -249,6 +264,13 @@ definitions:
         type: string
       reviewStatus:
         description: 审核状态
+        example: ""
+        type: string
+    type: object
+  picture.PictureSearchByPictureRequest:
+    properties:
+      pictureId:
+        description: 图片ID
         example: ""
         type: string
     type: object
@@ -964,6 +986,38 @@ paths:
           schema:
             $ref: '#/definitions/common.Response'
       summary: 执行图片审核「管理员」
+      tags:
+      - picture
+  /v1/picture/search/picture:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureSearchByPictureRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ImageSearchResult'
+                  type: array
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据图片ID搜索图片
       tags:
       - picture
   /v1/picture/tag_category:

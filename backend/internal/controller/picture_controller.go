@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"chg/internal/api/imagesearch"
+	imgSearchModel "chg/internal/api/imagesearch/model"
 	"chg/internal/common"
 	"chg/internal/consts"
 	"chg/internal/ecode"
@@ -12,6 +14,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+func dumb2() {
+	_ = imgSearchModel.ImageSearchResult{}
+}
 
 // 获取一个pictureService单例
 var sPicture *service.PictureService = service.NewPictureService()
@@ -399,4 +405,36 @@ func DoPictureReview(c *gin.Context) {
 		return
 	}
 	common.Success(c, true)
+}
+
+// SearchPictureByPicture godoc
+// @Summary      根据图片ID搜索图片
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.PictureSearchByPictureRequest true "图片的ID"
+// @Success      200  {object}  common.Response{data=[]imgSearchModel.ImageSearchResult} "获取成功"
+// @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
+// @Router       /v1/picture/search/picture [POST]
+func SearchPictureByPicture(c *gin.Context) {
+	var req reqPicture.PictureSearchByPictureRequest
+	if err := c.ShouldBind(&req); err != nil {
+		common.BaseResponse(c, nil, "参数绑定失败", ecode.PARAMS_ERROR)
+		return
+	}
+	if req.PictureId <= 0 {
+		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
+		return
+	}
+	oldPic, err := sPicture.GetPictureById(req.PictureId)
+	if err != nil || oldPic == nil {
+		common.BaseResponse(c, nil, "不存在该图片，或图片获取失败", ecode.PARAMS_ERROR)
+		return
+	}
+	resultList, err := imagesearch.SearchImage(oldPic.URL)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, resultList)
 }

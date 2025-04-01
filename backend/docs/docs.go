@@ -512,6 +512,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/picture/search/picture": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "根据图片ID搜索图片",
+                "parameters": [
+                    {
+                        "description": "图片的ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureSearchByPictureRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.ImageSearchResult"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/picture/tag_category": {
             "get": {
                 "consumes": [
@@ -1774,6 +1828,19 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ImageSearchResult": {
+            "type": "object",
+            "properties": {
+                "fromURL": {
+                    "description": "来源地址",
+                    "type": "string"
+                },
+                "thumbURL": {
+                    "description": "缩略图地址",
+                    "type": "string"
+                }
+            }
+        },
         "picture.ListPictureResponse": {
             "type": "object",
             "properties": {
@@ -1867,6 +1934,10 @@ const docTemplate = `{
                     "description": "当前页数",
                     "type": "integer"
                 },
+                "endEditTime": {
+                    "description": "结束编辑时间",
+                    "type": "string"
+                },
                 "id": {
                     "description": "图片ID",
                     "type": "string",
@@ -1931,6 +2002,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": ""
                 },
+                "startEditTime": {
+                    "description": "开始编辑时间",
+                    "type": "string"
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -1958,6 +2033,16 @@ const docTemplate = `{
                 },
                 "reviewStatus": {
                     "description": "审核状态",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "picture.PictureSearchByPictureRequest": {
+            "type": "object",
+            "properties": {
+                "pictureId": {
+                    "description": "图片ID",
                     "type": "string",
                     "example": ""
                 }
