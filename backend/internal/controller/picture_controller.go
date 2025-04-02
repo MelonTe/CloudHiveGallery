@@ -438,3 +438,80 @@ func SearchPictureByPicture(c *gin.Context) {
 	}
 	common.Success(c, resultList)
 }
+
+// SearchPictureByColor godoc
+// @Summary      根据图片的颜色搜索相似图片「登录校验」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.PictureSearchByColorRequest true "图片的颜色和空间ID"
+// @Success      200  {object}  common.Response{data=[]resPicture.PictureVO} "获取成功"
+// @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
+// @Router       /v1/picture/search/color [POST]
+func SearchPictureByColor(c *gin.Context) {
+	var req reqPicture.PictureSearchByColorRequest
+	if err := c.ShouldBind(&req); err != nil {
+		common.BaseResponse(c, nil, "参数绑定失败", ecode.PARAMS_ERROR)
+		return
+	}
+	if req.PicColor == "" || req.SpaceID <= 0 {
+		common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
+		return
+	}
+	loginUser, _ := sUser.GetLoginUser(c)
+	resultList, err := sPicture.SearchPictureByColor(loginUser, req.PicColor, req.SpaceID)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, resultList)
+}
+
+// PictureEditByBatch godoc
+// @Summary      批量更新图片请求「登录校验」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.PictureEditByBatchRequest true "批量的图片ID、空间ID和分类和标签"
+// @Success      200  {object}  common.Response{data=bool} "更新成功"
+// @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
+// @Router       /v1/picture/edit/batch [POST]
+func PictureEditByBatch(c *gin.Context) {
+	var req reqPicture.PictureEditByBatchRequest
+	//定义中间结构体，解析[]string数组
+	type middleReq struct {
+		PictureIdList []string `json:"pictureIdList" swaggertype:"array,string"` // 图片ID列表
+		SpaceID       uint64   `json:"spaceId,string" swaggertype:"string"`      //空间ID
+		Category      string   `json:"category"`                                 //分类
+		Tags          []string `json:"tags"`                                     //标签
+		NameRule      string   `json:"nameRule"`                                 //名称规则，暂时只支持“名称{序号}的形式，序号将会自动递增”
+	}
+	var midReq middleReq
+	if err := c.ShouldBind(&midReq); err != nil {
+		common.BaseResponse(c, nil, "参数绑定失败", ecode.PARAMS_ERROR)
+		return
+	}
+	//转化成请求结构体
+	var picIdList []uint64
+	for _, idStr := range midReq.PictureIdList {
+		id, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			common.BaseResponse(c, nil, "参数错误", ecode.PARAMS_ERROR)
+			return
+		}
+		picIdList = append(picIdList, id)
+	}
+	req.PictureIdList = picIdList
+	req.Category = midReq.Category
+	req.SpaceID = midReq.SpaceID
+	req.Tags = midReq.Tags
+	req.NameRule = midReq.NameRule
+	//获取登录用户，调用service
+	loginUser, _ := sUser.GetLoginUser(c)
+	suc, err := sPicture.PictureEditByBatch(&req, loginUser)
+	if err != nil {
+		common.BaseResponse(c, false, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, suc)
+}

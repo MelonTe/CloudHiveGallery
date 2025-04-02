@@ -32,6 +32,21 @@ export async function postPictureEdit(
   })
 }
 
+/** 批量更新图片请求「登录校验」 POST /v1/picture/edit/batch */
+export async function postPictureEditBatch(
+  body: API.PictureEditByBatchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: boolean }>('/v1/picture/edit/batch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 根据ID获取图片「管理员」 GET /v1/picture/get */
 export async function getPictureGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -116,6 +131,21 @@ export async function postPictureReview(
   options?: { [key: string]: any }
 ) {
   return request<API.Response & { data?: boolean }>('/v1/picture/review', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** 根据图片的颜色搜索相似图片「登录校验」 POST /v1/picture/search/color */
+export async function postPictureSearchColor(
+  body: API.PictureSearchByColorRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.PictureVO[] }>('/v1/picture/search/color', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

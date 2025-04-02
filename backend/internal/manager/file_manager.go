@@ -64,6 +64,10 @@ func UploadPicture(multipartFile *multipart.FileHeader, uploadPrefix string) (*f
 	if err != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片信息失败")
 	}
+	color, err := tcos.GetPictureColor(uploadPath)
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片主色调失败")
+	}
 	return &file.UploadPictureResult{
 		URL:          config.LoadConfig().Tcos.Host + "/" + uploadPath,
 		ThumbnailURL: config.LoadConfig().Tcos.Host + "/" + thumbnailUrl,
@@ -73,6 +77,7 @@ func UploadPicture(multipartFile *multipart.FileHeader, uploadPrefix string) (*f
 		PicHeight:    picInfo.Height,
 		PicScale:     math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
 		PicFormat:    picInfo.Format,
+		PicColor:     color,
 	}, nil
 }
 
@@ -161,6 +166,10 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 	if errr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片信息失败")
 	}
+	color, errr := tcos.GetPictureColor(uploadPath)
+	if errr != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "获取图片主色调失败")
+	}
 	//picName去除后缀，作为图片昵称
 	picNameNoType := picName[:strings.LastIndex(picName, ".")]
 	return &file.UploadPictureResult{
@@ -172,6 +181,7 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 		PicHeight:    picInfo.Height,
 		PicScale:     math.Round(float64(picInfo.Width)/float64(picInfo.Height)*100) / 100,
 		PicFormat:    picInfo.Format,
+		PicColor:     color,
 	}, nil
 }
 

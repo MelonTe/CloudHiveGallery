@@ -210,6 +210,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/picture/edit/batch": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "批量更新图片请求「登录校验」",
+                "parameters": [
+                    {
+                        "description": "批量的图片ID、空间ID和分类和标签",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureEditByBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/picture/get": {
             "get": {
                 "consumes": [
@@ -505,6 +556,60 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/picture/search/color": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "根据图片的颜色搜索相似图片「登录校验」",
+                "parameters": [
+                    {
+                        "description": "图片的颜色和空间ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.PictureSearchByColorRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/picture.PictureVO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
                         }
@@ -1701,6 +1806,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "picColor": {
+                    "type": "string"
+                },
                 "picFormat": {
                     "type": "string"
                 },
@@ -1895,6 +2003,38 @@ const docTemplate = `{
                 }
             }
         },
+        "picture.PictureEditByBatchRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "分类",
+                    "type": "string"
+                },
+                "nameRule": {
+                    "description": "名称规则，暂时只支持“名称{序号}的形式，序号将会自动递增”",
+                    "type": "string"
+                },
+                "pictureIdList": {
+                    "description": "图片ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "tags": {
+                    "description": "标签",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "picture.PictureEditRequest": {
             "type": "object",
             "properties": {
@@ -2038,6 +2178,20 @@ const docTemplate = `{
                 }
             }
         },
+        "picture.PictureSearchByColorRequest": {
+            "type": "object",
+            "properties": {
+                "picColor": {
+                    "description": "图片颜色",
+                    "type": "string"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
         "picture.PictureSearchByPictureRequest": {
             "type": "object",
             "properties": {
@@ -2154,6 +2308,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "picColor": {
                     "type": "string"
                 },
                 "picFormat": {

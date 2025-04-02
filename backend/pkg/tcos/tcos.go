@@ -176,6 +176,32 @@ func GetPictureInfo(key string) (*PicInfo, error) {
 	return &picInfo, nil
 }
 
+// 获取图片的主色调，返回十六进制的图片主色调，例如：0x736246
+func GetPictureColor(key string) (string, error) {
+	operation := "imageAve"
+	resp, err := tcos.CI.Get(context.Background(), key, operation, nil)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	//获取响应体
+	var result map[string]string
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	//解析JSON
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
+	}
+	//获取RGB值
+	rgb := result["RGB"]
+	if rgb == "" {
+		return "", fmt.Errorf("获取图片主色调失败")
+	}
+	return rgb, nil
+}
+
 // 删除对象，key为唯一标识
 func DeleteObject(key string) error {
 	_, err := tcos.Object.Delete(context.Background(), key)
