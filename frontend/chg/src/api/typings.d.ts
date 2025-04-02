@@ -107,6 +107,7 @@ declare namespace API {
     id?: string
     introduction?: string
     name?: string
+    picColor?: string
     picFormat?: string
     picHeight?: number
     picScale?: number
@@ -123,6 +124,19 @@ declare namespace API {
     updateTime?: string
     url?: string
     userId?: string
+  }
+
+  type PictureEditByBatchRequest = {
+    /** 分类 */
+    category?: string
+    /** 名称规则，暂时只支持“名称{序号}的形式，序号将会自动递增” */
+    nameRule?: string
+    /** 图片ID列表 */
+    pictureIdList?: string[]
+    /** 空间ID */
+    spaceId?: string
+    /** 标签 */
+    tags?: string[]
   }
 
   type PictureEditRequest = {
@@ -183,6 +197,13 @@ declare namespace API {
     reviewStatus?: string
   }
 
+  type PictureSearchByColorRequest = {
+    /** 图片颜色 */
+    picColor?: string
+    /** 空间ID */
+    spaceId?: string
+  }
+
   type PictureSearchByPictureRequest = {
     /** 图片ID */
     pictureId?: string
@@ -230,6 +251,7 @@ declare namespace API {
     id?: string
     introduction?: string
     name?: string
+    picColor?: string
     picFormat?: string
     picHeight?: number
     picScale?: number

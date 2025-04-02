@@ -11,6 +11,7 @@ import (
 	resPicture "chg/internal/model/response/picture"
 	resUser "chg/internal/model/response/user"
 	"chg/internal/repository"
+	"chg/internal/utils"
 	"chg/pkg/cache"
 	"chg/pkg/db"
 	"chg/pkg/rds"
@@ -24,6 +25,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -130,6 +132,7 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		PicHeight:    info.PicHeight,
 		PicScale:     info.PicScale,
 		PicFormat:    info.PicFormat,
+		PicColor:     info.PicColor,
 		UserID:       loginUser.ID,
 		EditTime:     time.Now(),
 		SpaceID:      PictureUploadRequest.SpaceID, //指定空间id
@@ -650,4 +653,112 @@ func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entit
 		}
 	}
 	return nil
+}
+
+// 通过图片的颜色搜索颜色相近的图片，返回图片视图列表
+func (s *PictureService) SearchPictureByColor(loginUser *entity.User, picColor string, spaceId uint64) ([]resPicture.PictureVO, *ecode.ErrorWithCode) {
+	//1.参数校验
+	if spaceId <= 0 || picColor == "" {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "参数错误")
+	}
+	if loginUser == nil {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "用户未登录")
+	}
+	//2.权限校验
+	//获取空间
+	space, err := repository.NewSpaceRepository().GetSpaceById(nil, spaceId)
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库异常")
+	}
+	if space == nil {
+		return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
+	}
+	if space.UserID != loginUser.ID {
+		return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+	}
+	//3.查询该空间下的所有图片，必须拥有主色调
+	//构造一个查询请求，调用QueryWrapper
+	queryRequest := &reqPicture.PictureQueryRequest{
+		SpaceID: spaceId,
+	}
+	query, _ := s.GetQueryWrapper(db.LoadDB(), queryRequest)
+	//添加条件，查询所有拥有主色调的图片
+	query = query.Where("pic_color IS NOT NULL AND pic_color != ''")
+	//执行查询
+	var pictures []entity.Picture
+	err = query.Find(&pictures).Error
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库异常")
+	}
+	if len(pictures) == 0 {
+		return nil, nil //若无图片，返回空列表
+	}
+	//4.计算相似度并且排序
+	sort.Slice(pictures, func(i, j int) bool {
+		//计算相似度，使用utils包中的函数
+		similarityI := utils.ColorSimilarity(pictures[i].PicColor, picColor)
+		similarityJ := utils.ColorSimilarity(pictures[j].PicColor, picColor)
+		return similarityI > similarityJ // 降序排列
+	})
+	//5.返回结果
+	//因为不需要用户信息，所以调用响应里自带的方法，减少用户的查询
+	var picVOList []resPicture.PictureVO
+	for _, picture := range pictures {
+		picVOList = append(picVOList, resPicture.EntityToVO(picture, resUser.UserVO{}))
+	}
+	return picVOList, nil
+}
+
+func (s *PictureService) PictureEditByBatch(req *reqPicture.PictureEditByBatchRequest, loginUser *entity.User) (bool, *ecode.ErrorWithCode) {
+	//1.参数校验
+	if loginUser == nil {
+		return false, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "未登录")
+	}
+	if req.SpaceID <= 0 {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "空间ID不能为空")
+	}
+	if len([]rune(req.NameRule)) > 20 {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "名称规则过长")
+	}
+	//2.空间权限校验
+	space, err := NewSpaceService().GetSpaceById(req.SpaceID)
+	if err != nil {
+		return false, err
+	}
+	if space == nil {
+		return false, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
+	}
+	if space.UserID != loginUser.ID {
+		return false, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
+	}
+	//3.获取图片列表
+	var picList []entity.Picture
+	db := db.LoadDB()
+	db.Where(req.PictureIdList).Where("space_id = ?", req.SpaceID).Find(&picList)
+	if len(picList) == 0 {
+		return true, nil
+	}
+	//4.更新分类和标签
+	//填充名称字段
+	s.fillPictureNameWithRule(picList, req.NameRule)
+	//设置更新字段
+	tags, originErr := json.Marshal(&req.Tags)
+	if originErr != nil {
+		return false, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "标签参数错误")
+	}
+	//批量更新
+	originErr = s.PictureRepo.UpdatePicturesByBatch(nil, picList, string(tags), req.Category)
+	if originErr != nil {
+		return false, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库批量更新图片异常")
+	}
+	return true, nil
+}
+
+// 填充图片的昵称，传入的昵称规则如“名称{序号}”，序号从1开始递增
+func (s *PictureService) fillPictureNameWithRule(pic []entity.Picture, nameRule string) {
+	index := 1
+	for i := range pic {
+		pic[i].Name = strings.Replace(nameRule, "{序号}", fmt.Sprintf("%d", index), -1)
+		index++
+	}
 }

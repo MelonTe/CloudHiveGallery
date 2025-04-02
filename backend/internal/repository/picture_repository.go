@@ -4,6 +4,8 @@ import (
 	"chg/internal/model/entity"
 	"chg/pkg/db"
 	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -65,4 +67,29 @@ func (r *PictureRepository) UpdateById(tx *gorm.DB, id uint64, updateMap map[str
 		tx = r.db
 	}
 	return tx.Model(&entity.Picture{ID: id}).Updates(updateMap).Error
+}
+
+// 更新图片的昵称、标签和分类。
+func (r *PictureRepository) UpdatePicturesByBatch(tx *gorm.DB, pics []entity.Picture, tags string, category string) error {
+	if tx == nil {
+		tx = r.db
+	}
+	// 构建 SQL 语句
+	var ids []uint64
+	caseWhenSQL := "CASE id "
+	for _, pic := range pics {
+		ids = append(ids, pic.ID)
+		caseWhenSQL += fmt.Sprintf("WHEN %d THEN '%s' ", pic.ID, pic.Name)
+	}
+	caseWhenSQL += "END"
+	// 执行批量更新
+	sql := fmt.Sprintf(`
+		UPDATE pictures
+		SET name = %s,
+		    tags = ?,
+		    category = ?
+		WHERE id IN ?`, caseWhenSQL)
+
+	// 执行 SQL
+	return tx.Exec(sql, tags, category, ids).Error
 }

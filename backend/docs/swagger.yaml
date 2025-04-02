@@ -31,6 +31,8 @@ definitions:
         type: string
       name:
         type: string
+      picColor:
+        type: string
       picFormat:
         type: string
       picHeight:
@@ -164,6 +166,29 @@ definitions:
         description: 总记录数
         type: integer
     type: object
+  picture.PictureEditByBatchRequest:
+    properties:
+      category:
+        description: 分类
+        type: string
+      nameRule:
+        description: 名称规则，暂时只支持“名称{序号}的形式，序号将会自动递增”
+        type: string
+      pictureIdList:
+        description: 图片ID列表
+        items:
+          type: string
+        type: array
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+      tags:
+        description: 标签
+        items:
+          type: string
+        type: array
+    type: object
   picture.PictureEditRequest:
     properties:
       category:
@@ -267,6 +292,16 @@ definitions:
         example: ""
         type: string
     type: object
+  picture.PictureSearchByColorRequest:
+    properties:
+      picColor:
+        description: 图片颜色
+        type: string
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+    type: object
   picture.PictureSearchByPictureRequest:
     properties:
       pictureId:
@@ -348,6 +383,8 @@ definitions:
       introduction:
         type: string
       name:
+        type: string
+      picColor:
         type: string
       picFormat:
         type: string
@@ -810,6 +847,36 @@ paths:
       summary: 编辑图片
       tags:
       - picture
+  /v1/picture/edit/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 批量的图片ID、空间ID和分类和标签
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureEditByBatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 批量更新图片请求「登录校验」
+      tags:
+      - picture
   /v1/picture/get:
     get:
       consumes:
@@ -986,6 +1053,38 @@ paths:
           schema:
             $ref: '#/definitions/common.Response'
       summary: 执行图片审核「管理员」
+      tags:
+      - picture
+  /v1/picture/search/color:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图片的颜色和空间ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/picture.PictureSearchByColorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/picture.PictureVO'
+                  type: array
+              type: object
+        "400":
+          description: 获取失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 根据图片的颜色搜索相似图片「登录校验」
       tags:
       - picture
   /v1/picture/search/picture:

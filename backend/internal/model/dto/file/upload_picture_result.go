@@ -12,4 +12,5 @@ type UploadPictureResult struct {
 	PicHeight    int     `json:"picHeight"`
 	PicScale     float64 `json:"picScale"`
 	PicFormat    string  `json:"picFormat"`
+	PicColor     string  `json:"picColor"`
 }

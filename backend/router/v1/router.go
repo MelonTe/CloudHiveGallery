@@ -48,6 +48,8 @@ func RegisterV1Routes(r *gin.Engine) {
 			pictureAPI.GET("/tag_category", controller.ListPictureTagCategory)
 			pictureAPI.POST("/review", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.DoPictureReview)
 			pictureAPI.POST("/search/picture", controller.SearchPictureByPicture)
+			pictureAPI.POST("/search/color", middleware.LoginCheck(service.NewUserService()), controller.SearchPictureByColor)
+			pictureAPI.POST("/edit/batch", middleware.LoginCheck(service.NewUserService()), controller.PictureEditByBatch)
 		}
 		spaceAPI := apiV1.Group("/space")
 		{

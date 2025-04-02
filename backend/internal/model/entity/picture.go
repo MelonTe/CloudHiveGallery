@@ -28,6 +28,7 @@ type Picture struct {
 	ReviewerID    uint64         `gorm:"comment:审核人 ID" json:"reviewerId,string" swaggertype:"string"`
 	ReviewTime    time.Time      `gorm:"type:datetime;comment:审核时间" json:"reviewTime"`
 	SpaceID       uint64         `gorm:"index:idx_spaceId;comment:空间 id;default:null" json:"spaceId,string" swaggertype:"string"`
+	PicColor      string         `gorm:"type:varchar(16);comment:主色调" json:"picColor"`
 }
 
 // AutoMigratePicture 执行数据库迁移

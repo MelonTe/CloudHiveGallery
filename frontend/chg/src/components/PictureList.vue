@@ -33,32 +33,39 @@
 
             <!-- 操作按钮 -->
             <template v-if="showOp" #actions>
-              <a-space class="card-actions" @click="e => doSearch(picture, e)">
+              <a-space class="card-actions" @click="(e) => doShare(picture, e)">
+                <share-alt-outlined />
+              </a-space>
+              <a-space class="card-actions" @click="(e) => doSearch(picture, e)">
                 <search-outlined />
-                搜索
               </a-space>
-              <a-space class="card-actions" @click="e => doEdit(picture, e)">
+              <a-space class="card-actions" @click="(e) => doEdit(picture, e)">
                 <edit-outlined />
-                编辑
               </a-space>
-              <a-space class="card-actions" @click="e => doDelete(picture, e)">
+              <a-space class="card-actions" @click="(e) => doDelete(picture, e)">
                 <delete-outlined />
-                删除
               </a-space>
             </template>
           </a-card>
-
         </a-list-item>
       </template>
     </a-list>
+    <ShareModal ref="shareModalRef" :link="shareLink" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import {ref} from 'vue'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons-vue'
 import { postPictureOpenApiDelete } from '@/api/picture.ts'
 import { message } from 'ant-design-vue'
+import ShareModal from '@/components/ShareModal.vue'
 
 interface Props {
   dataList?: API.PictureVO[]
@@ -66,7 +73,6 @@ interface Props {
   showOp?: boolean
   onReload?: () => void
 }
-
 
 const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
@@ -87,7 +93,6 @@ const doSearch = (picture, e) => {
   e.stopPropagation()
   window.open(`/search_picture?pictureId=${picture.id}`)
 }
-
 
 // 编辑
 const doEdit = (picture, e) => {
@@ -117,6 +122,21 @@ const doDelete = async (picture, e) => {
     message.error('删除失败')
   }
 }
+
+// 分享弹窗引用
+const shareModalRef = ref()
+// 分享链接
+const shareLink = ref<string>()
+
+// 分享
+const doShare = (picture: API.PictureVO, e: Event) => {
+  e.stopPropagation()
+  shareLink.value = `${window.location.protocol}//${window.location.host}/picture/${picture.id}`
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal()
+  }
+}
+
 
 </script>
 
@@ -180,5 +200,4 @@ const doDelete = async (picture, e) => {
 .card-actions:hover {
   color: #1890ff;
 }
-
 </style>
