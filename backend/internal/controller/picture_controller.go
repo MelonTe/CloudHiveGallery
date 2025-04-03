@@ -9,10 +9,9 @@ import (
 	reqPicture "chg/internal/model/request/picture"
 	resPicture "chg/internal/model/response/picture"
 	"chg/internal/service"
+	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func dumb2() {
@@ -73,8 +72,10 @@ func UploadPictureByUrl(c *gin.Context) {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
-	//若picUrl包含了?解析参数，需要去掉
-	if idx := strings.LastIndex(picReq.FileUrl, "?"); idx != -1 {
+	//对于AI扩图，携带的query参数需要保留
+	remove := strings.Contains(picReq.FileUrl, "OSSAccess")
+	//对于一般网站，若picUrl包含了?解析参数，需要去掉
+	if idx := strings.LastIndex(picReq.FileUrl, "?"); idx != -1 && !remove {
 		picReq.FileUrl = picReq.FileUrl[:idx]
 	}
 	picVO, err := sPicture.UploadPicture(picReq.FileUrl, picReq, loginUser)
@@ -514,4 +515,47 @@ func PictureEditByBatch(c *gin.Context) {
 		return
 	}
 	common.Success(c, suc)
+}
+
+// CreatePictureOutPaintingTask godoc
+// @Summary      创建AI扩图任务请求「登录校验」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		request body reqPicture.CreateOutPaintingTaskRequest true "创建扩图任务所需信息"
+// @Success      200  {object}  common.Response{data=resPicture.CreateOutPaintingTaskResponse} "创建成功，返回任务信息"
+// @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
+// @Router       /v1/picture/out_painting/create_task [POST]
+func CreatePictureOutPaintingTask(c *gin.Context) {
+	var req reqPicture.CreateOutPaintingTaskRequest
+	if err := c.ShouldBind(&req); err != nil {
+		common.BaseResponse(c, nil, "参数绑定失败", ecode.PARAMS_ERROR)
+		return
+	}
+	loginUser, _ := sUser.GetLoginUser(c)
+	res, err := sPicture.CreatePictureOutPaintingTask(&req, loginUser)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, *res)
+}
+
+// GetOutPaintingTaskResponse godoc
+// @Summary      获取AI扩图任务信息「登录校验」
+// @Tags         picture
+// @Accept       json
+// @Produce      json
+// @Param		taskId query string true "任务的ID"
+// @Success      200  {object}  common.Response{data=resPicture.GetOutPaintingResponse} "获取成功，返回任务进展信息"
+// @Failure      400  {object}  common.Response "获取失败，详情见响应中的code"
+// @Router       /v1/picture/out_painting/create_task [GET]
+func GetOutPaintingTaskResponse(c *gin.Context) {
+	taskId := c.Query("taskId")
+	res, err := sPicture.GetOutPaintingTaskResponse(taskId)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, *res)
 }

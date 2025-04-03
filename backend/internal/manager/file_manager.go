@@ -119,7 +119,6 @@ func ValidPicture(multipartFile *multipart.FileHeader) *ecode.ErrorWithCode {
 // picName: 上传的图片的名称，若为空，则默认为“临时图片” + 一个随机种子。不为空，则只添加一个随机种子。
 func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*file.UploadPictureResult, *ecode.ErrorWithCode) {
 	//1.校验文件
-
 	//图片的暂时昵称用“临时图片”代替
 	if picName == "" {
 		picName = "临时图片"
@@ -132,7 +131,7 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 	}
 	//2.校验成功，将图片获取到本地tempfile中
 	//localFilePath的格式为:tempfile/picName（包含了后缀）
-	localFilePath, err := downLoadPictureByURL(fileURL, picName)
+	localFilePath, err := downLoadPictureByURL(fileURL, &picName)
 	if err != nil {
 		return nil, err
 	}
@@ -186,11 +185,19 @@ func UploadPictureByURL(fileURL string, uploadPrefix string, picName string) (*f
 }
 
 // 下载图片到本地存储tempfile中，请确保地址已经校验过。
-// 返回存储的本地路径，例如：tempfile/picName.jpg
-func downLoadPictureByURL(fileURL string, picName string) (string, *ecode.ErrorWithCode) {
+// 请确保picName已经添加了后缀
+// 若picName无后缀，会尝试从get请求获取后缀
+// 返回存储的本地路径，例如：tempfile/picName
+func downLoadPictureByURL(fileURL string, picName *string) (string, *ecode.ErrorWithCode) {
 	resp, err := http.Get(fileURL)
 	if err != nil {
 		return "", ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "下载图片失败")
+	}
+	//若picName没有后缀，则尝试从get请求获取后缀
+	if lastDotIndex := strings.LastIndex(*picName, "."); lastDotIndex == -1 {
+		if err := ValidPictureByHeader(resp, picName); err != nil {
+			return "", err
+		}
 	}
 	defer resp.Body.Close()
 	//创建临时文件
@@ -199,7 +206,7 @@ func downLoadPictureByURL(fileURL string, picName string) (string, *ecode.ErrorW
 		return "", ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "创建临时文件夹失败")
 	}
 	//获取文件原始昵称，拼接存储路径
-	tempFilePath := tempDir + "/" + picName
+	tempFilePath := tempDir + "/" + *picName
 	//创建文件
 	file, err := os.Create(tempFilePath)
 	if err != nil {
@@ -250,6 +257,27 @@ func ValidPictureByURL(fileURL string, picName *string) *ecode.ErrorWithCode {
 		return nil
 	}
 	//4.文件存在，文件类型校验
+	if err := ValidPictureByHeader(resp, picName); err != nil {
+		return err
+	}
+	//5.文件大小校验
+	contentLength := resp.Header.Get("Content-Length")
+	//不为空校验
+	if contentLength != "" {
+		size, err := strconv.ParseUint(contentLength, 10, 64)
+		if err != nil {
+			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件大小格式异常")
+		}
+		ONE_M := uint64(1024 * 1024)
+		if size > 2*ONE_M {
+			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件过大，不能超过2MB")
+		}
+	}
+	return nil
+}
+
+// 单独从header校验文件类型，若合规则将文件类型添加到picName中
+func ValidPictureByHeader(resp *http.Response, picName *string) *ecode.ErrorWithCode {
 	contentType := resp.Header.Get("Content-Type")
 	//不为空，才校验是否合法
 	if contentType != "" {
@@ -265,19 +293,6 @@ func ValidPictureByURL(fileURL string, picName *string) *ecode.ErrorWithCode {
 		}
 		if !isAllow {
 			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件类型不支持")
-		}
-	}
-	//5.文件大小校验
-	contentLength := resp.Header.Get("Content-Length")
-	//不为空校验
-	if contentLength != "" {
-		size, err := strconv.ParseUint(contentLength, 10, 64)
-		if err != nil {
-			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件大小格式异常")
-		}
-		ONE_M := uint64(1024 * 1024)
-		if size > 2*ONE_M {
-			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件过大，不能超过2MB")
 		}
 	}
 	return nil

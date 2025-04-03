@@ -50,6 +50,8 @@ func RegisterV1Routes(r *gin.Engine) {
 			pictureAPI.POST("/search/picture", controller.SearchPictureByPicture)
 			pictureAPI.POST("/search/color", middleware.LoginCheck(service.NewUserService()), controller.SearchPictureByColor)
 			pictureAPI.POST("/edit/batch", middleware.LoginCheck(service.NewUserService()), controller.PictureEditByBatch)
+			pictureAPI.POST("/out_painting/create_task", middleware.LoginCheck(service.NewUserService()), controller.CreatePictureOutPaintingTask)
+			pictureAPI.GET("/out_painting/create_task", middleware.LoginCheck(service.NewUserService()), controller.GetOutPaintingTaskResponse)
 		}
 		spaceAPI := apiV1.Group("/space")
 		{

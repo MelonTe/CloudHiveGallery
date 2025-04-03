@@ -1,4 +1,22 @@
 declare namespace API {
+  type CreateOutPaintingTaskRequest = {
+    /** 图像处理任务的参数 */
+    parameters?: ImageParameters
+    /** 图片ID */
+    pictureId?: string
+  }
+
+  type CreateOutPaintingTaskResponse = {
+    /** 错误码（失败时返回） */
+    code?: string
+    /** 错误信息（失败时返回） */
+    message?: string
+    /** 任务输出信息（成功时返回） */
+    output?: Output
+    /** 请求唯一标识符 */
+    requestId?: string
+  }
+
   type DeleteRequest = {
     id: string
   }
@@ -6,6 +24,15 @@ declare namespace API {
   type getFileTestDownloadParams = {
     /** 文件存储在 COS 的 KEY */
     key: string
+  }
+
+  type GetOutPaintingResponse = {
+    /** 任务输出信息（一定包含） */
+    output?: TaskDetailOutput
+    /** 请求唯一标识 */
+    requestId?: string
+    /** 图像统计信息（仅在成功时返回） */
+    usage?: Usage
   }
 
   type getPictureGetParams = {
@@ -16,6 +43,11 @@ declare namespace API {
   type getPictureGetVoParams = {
     /** 图片的ID */
     id: string
+  }
+
+  type getPictureOutPaintingCreateTaskParams = {
+    /** 任务的ID */
+    taskId: string
   }
 
   type getSpaceGetVoParams = {
@@ -31,6 +63,31 @@ declare namespace API {
   type getUserGetVoParams = {
     /** 用户的ID */
     id: string
+  }
+
+  type ImageParameters = {
+    /** 是否添加水印 */
+    addWatermark?: boolean
+    /** 图像旋转角度（单位：度） */
+    angle?: number
+    /** 是否启用最佳质量 */
+    bestQuality?: boolean
+    /** 图像底部的偏移量 */
+    bottomOffset?: number
+    /** 图像左侧的偏移量 */
+    leftOffset?: number
+    /** 是否限制图像大小 */
+    limitImageSize?: boolean
+    /** 输出图像的宽高比（例如："16:9"） */
+    outputRatio?: string
+    /** 图像右侧的偏移量 */
+    rightOffset?: number
+    /** 图像顶部的偏移量 */
+    topOffset?: number
+    /** 图像的水平缩放比例，范围在1.0 ~ 3.0 */
+    xScale?: number
+    /** 图像的垂直缩放比例，范围在1.0 ~ 3.0 */
+    yScale?: number
   }
 
   type ImageSearchResult = {
@@ -98,6 +155,13 @@ declare namespace API {
     size?: number
     /** 总记录数 */
     total?: number
+  }
+
+  type Output = {
+    /** 任务的唯一标识符 */
+    taskId?: string
+    /** 任务状态：PENDING、RUNNING、SUSPENDED、SUCCEEDED、FAILED、UNKNOWN */
+    taskStatus?: string
   }
 
   type Picture = {
@@ -358,6 +422,41 @@ declare namespace API {
     user?: UserVO
     /** User ID */
     userId?: string
+  }
+
+  type TaskDetailOutput = {
+    /** 错误码（失败时返回） */
+    code?: string
+    /** 任务完成时间（成功或失败时返回） */
+    endTime?: string
+    /** 错误信息（失败时返回） */
+    message?: string
+    /** 输出图像的 URL（成功时返回） */
+    outputImageUrl?: string
+    /** 任务调度时间（成功或失败时返回） */
+    scheduledTime?: string
+    /** 任务提交时间（成功或失败时返回） */
+    submitTime?: string
+    /** 任务的唯一标识符 */
+    taskId?: string
+    /** 任务结果统计（执行中时返回） */
+    taskMetrics?: TaskMetrics
+    /** 任务状态：PENDING、RUNNING、SUSPENDED、SUCCEEDED、FAILED、UNKNOWN */
+    taskStatus?: string
+  }
+
+  type TaskMetrics = {
+    /** 失败任务数 */
+    failed?: number
+    /** 成功任务数 */
+    succeeded?: number
+    /** 总任务数 */
+    total?: number
+  }
+
+  type Usage = {
+    /** 生成的图片数量 */
+    imageCount?: number
   }
 
   type User = {

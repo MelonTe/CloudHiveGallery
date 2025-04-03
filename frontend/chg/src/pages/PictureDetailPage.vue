@@ -133,7 +133,7 @@ const doEdit = () => {
     path: '/add_picture',
     query: {
       id: picture.value.id,
-      spaceId: picture.value.spaceId,
+      ...(picture.value.spaceId && picture.value.spaceId !== "0" ? { spaceId: picture.value.spaceId } : {}),
     },
   })
 }

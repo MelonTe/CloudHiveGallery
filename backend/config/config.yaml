@@ -13,3 +13,5 @@ rds:
     host: "localhost"
     port: 6379
     password: "chg"
+aliYunAi:
+  apiKey: "sk-6daaa1e5d9b3425f975ec6a7814e6b8b"
