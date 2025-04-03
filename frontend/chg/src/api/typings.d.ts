@@ -357,6 +357,24 @@ declare namespace API {
     spaceName?: string
   }
 
+  type SpaceCategoryAnalyzeRequest = {
+    /** 是否查询所有空间 */
+    queryAll?: boolean
+    /** 是否查询公开空间 */
+    queryPublic?: boolean
+    /** 空间ID */
+    spaceId?: string
+  }
+
+  type SpaceCategoryAnalyzeResponse = {
+    /** 分类名称 */
+    category?: string
+    /** 分类数量 */
+    count?: number
+    /** 分类总大小 */
+    totalSize?: number
+  }
+
   type SpaceEditRequest = {
     /** Space ID */
     id?: string
@@ -394,6 +412,43 @@ declare namespace API {
     userId?: string
   }
 
+  type SpaceRankAnalyzeRequest = {
+    /** 排名前N的空间 */
+    top_n?: number
+  }
+
+  type SpaceSizeAnalyzeRequest = {
+    /** 是否查询所有空间 */
+    queryAll?: boolean
+    /** 是否查询公开空间 */
+    queryPublic?: boolean
+    /** 空间ID */
+    spaceId?: string
+  }
+
+  type SpaceSizeAnalyzeResponse = {
+    /** 分类数量 */
+    count?: number
+    /** 大小范围，格式为"<100KB","100KB-500KB","500KB-1MB",">1MB" */
+    sizeRange?: string
+  }
+
+  type SpaceTagAnalyzeRequest = {
+    /** 是否查询所有空间 */
+    queryAll?: boolean
+    /** 是否查询公开空间 */
+    queryPublic?: boolean
+    /** 空间ID */
+    spaceId?: string
+  }
+
+  type SpaceTagAnalyzeResponse = {
+    /** 标签数量 */
+    count?: number
+    /** 标签名称 */
+    tag?: string
+  }
+
   type SpaceUpdateRequest = {
     /** Space ID */
     id?: string
@@ -405,6 +460,50 @@ declare namespace API {
     spaceLevel?: number
     /** Space name */
     spaceName?: string
+  }
+
+  type SpaceUsageAnalyzeRequest = {
+    /** 是否查询所有空间 */
+    queryAll?: boolean
+    /** 是否查询公开空间 */
+    queryPublic?: boolean
+    /** 空间ID */
+    spaceId?: string
+  }
+
+  type SpaceUsageAnalyzeResponse = {
+    /** 资源数量使用比例 */
+    countUsageRatio?: number
+    /** 最大资源数量 */
+    maxCount?: number
+    /** 最大空间大小 */
+    maxSize?: number
+    /** 空间使用比例 */
+    sizeUsageRatio?: number
+    /** 已使用的资源数量 */
+    usedCount?: number
+    /** 已使用的空间大小 */
+    usedSize?: number
+  }
+
+  type SpaceUserAnalyzeRequest = {
+    /** 是否查询所有空间 */
+    queryAll?: boolean
+    /** 是否查询公开空间 */
+    queryPublic?: boolean
+    /** 空间ID */
+    spaceId?: string
+    /** 时间维度：day/week/month */
+    timeDimension?: string
+    /** 用户ID */
+    userId?: string
+  }
+
+  type SpaceUserAnalyzeResponse = {
+    /** 周期内上传的图片数量 */
+    count?: number
+    /** 时间周期 */
+    period?: string
   }
 
   type SpaceVO = {

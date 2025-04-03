@@ -5,10 +5,12 @@
 import * as file from './file'
 import * as picture from './picture'
 import * as space from './space'
+import * as analyze from './analyze'
 import * as user from './user'
 export default {
   file,
   picture,
   space,
+  analyze,
   user,
 }

@@ -1,4 +1,142 @@
 definitions:
+  analyze.SpaceCategoryAnalyzeRequest:
+    properties:
+      queryAll:
+        description: 是否查询所有空间
+        type: boolean
+      queryPublic:
+        description: 是否查询公开空间
+        type: boolean
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+    type: object
+  analyze.SpaceCategoryAnalyzeResponse:
+    properties:
+      category:
+        description: 分类名称
+        type: string
+      count:
+        description: 分类数量
+        type: integer
+      totalSize:
+        description: 分类总大小
+        type: integer
+    type: object
+  analyze.SpaceRankAnalyzeRequest:
+    properties:
+      top_n:
+        description: 排名前N的空间
+        type: integer
+    type: object
+  analyze.SpaceSizeAnalyzeRequest:
+    properties:
+      queryAll:
+        description: 是否查询所有空间
+        type: boolean
+      queryPublic:
+        description: 是否查询公开空间
+        type: boolean
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+    type: object
+  analyze.SpaceSizeAnalyzeResponse:
+    properties:
+      count:
+        description: 分类数量
+        type: integer
+      sizeRange:
+        description: 大小范围，格式为"<100KB","100KB-500KB","500KB-1MB",">1MB"
+        type: string
+    type: object
+  analyze.SpaceTagAnalyzeRequest:
+    properties:
+      queryAll:
+        description: 是否查询所有空间
+        type: boolean
+      queryPublic:
+        description: 是否查询公开空间
+        type: boolean
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+    type: object
+  analyze.SpaceTagAnalyzeResponse:
+    properties:
+      count:
+        description: 标签数量
+        type: integer
+      tag:
+        description: 标签名称
+        type: string
+    type: object
+  analyze.SpaceUsageAnalyzeRequest:
+    properties:
+      queryAll:
+        description: 是否查询所有空间
+        type: boolean
+      queryPublic:
+        description: 是否查询公开空间
+        type: boolean
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+    type: object
+  analyze.SpaceUsageAnalyzeResponse:
+    properties:
+      countUsageRatio:
+        description: 资源数量使用比例
+        type: number
+      maxCount:
+        description: 最大资源数量
+        type: integer
+      maxSize:
+        description: 最大空间大小
+        type: integer
+      sizeUsageRatio:
+        description: 空间使用比例
+        type: number
+      usedCount:
+        description: 已使用的资源数量
+        type: integer
+      usedSize:
+        description: 已使用的空间大小
+        type: integer
+    type: object
+  analyze.SpaceUserAnalyzeRequest:
+    properties:
+      queryAll:
+        description: 是否查询所有空间
+        type: boolean
+      queryPublic:
+        description: 是否查询公开空间
+        type: boolean
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+      timeDimension:
+        description: 时间维度：day/week/month
+        type: string
+      userId:
+        description: 用户ID
+        example: ""
+        type: string
+    type: object
+  analyze.SpaceUserAnalyzeResponse:
+    properties:
+      count:
+        description: 周期内上传的图片数量
+        type: integer
+      period:
+        description: 时间周期
+        type: string
+    type: object
   common.DeleteRequest:
     properties:
       id:
@@ -1494,6 +1632,196 @@ paths:
       summary: 增加空间「需要登录」
       tags:
       - space
+  /v1/space/analyze/category:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceCategoryAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/analyze.SpaceCategoryAnalyzeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取空间图片分类分析「登录校验」
+      tags:
+      - space/analyze
+  /v1/space/analyze/rank:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceRankAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Space'
+                  type: array
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取空间使用情况排名「管理员」
+      tags:
+      - space/analyze
+  /v1/space/analyze/size:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceSizeAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/analyze.SpaceSizeAnalyzeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取空间图片大小范围统计分析「登录校验」
+      tags:
+      - space/analyze
+  /v1/space/analyze/tag:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceTagAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/analyze.SpaceTagAnalyzeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取空间标签出现量分析「登录校验」
+      tags:
+      - space/analyze
+  /v1/space/analyze/usage:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceUsageAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/analyze.SpaceUsageAnalyzeResponse'
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取空间使用分析「登录校验」
+      tags:
+      - space/analyze
+  /v1/space/analyze/user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/analyze.SpaceUserAnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/analyze.SpaceUserAnalyzeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 获取用户上传图片统计分析，支持分析特定用户「登录校验」
+      tags:
+      - space/analyze
   /v1/space/edit:
     post:
       consumes:

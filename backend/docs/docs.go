@@ -1076,6 +1076,327 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/space/analyze/category": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取空间图片分类分析「登录校验」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceCategoryAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/analyze.SpaceCategoryAnalyzeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/analyze/rank": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取空间使用情况排名「管理员」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceRankAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Space"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/analyze/size": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取空间图片大小范围统计分析「登录校验」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceSizeAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/analyze.SpaceSizeAnalyzeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/analyze/tag": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取空间标签出现量分析「登录校验」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceTagAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/analyze.SpaceTagAnalyzeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/analyze/usage": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取空间使用分析「登录校验」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceUsageAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/analyze.SpaceUsageAnalyzeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/space/analyze/user": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "space/analyze"
+                ],
+                "summary": "获取用户上传图片统计分析，支持分析特定用户「登录校验」",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/analyze.SpaceUserAnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/analyze.SpaceUserAnalyzeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/space/edit": {
             "post": {
                 "description": "若空间不存在，则返回false",
@@ -1856,6 +2177,199 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "analyze.SpaceCategoryAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "queryAll": {
+                    "description": "是否查询所有空间",
+                    "type": "boolean"
+                },
+                "queryPublic": {
+                    "description": "是否查询公开空间",
+                    "type": "boolean"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "analyze.SpaceCategoryAnalyzeResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "分类名称",
+                    "type": "string"
+                },
+                "count": {
+                    "description": "分类数量",
+                    "type": "integer"
+                },
+                "totalSize": {
+                    "description": "分类总大小",
+                    "type": "integer"
+                }
+            }
+        },
+        "analyze.SpaceRankAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "top_n": {
+                    "description": "排名前N的空间",
+                    "type": "integer"
+                }
+            }
+        },
+        "analyze.SpaceSizeAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "queryAll": {
+                    "description": "是否查询所有空间",
+                    "type": "boolean"
+                },
+                "queryPublic": {
+                    "description": "是否查询公开空间",
+                    "type": "boolean"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "analyze.SpaceSizeAnalyzeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "分类数量",
+                    "type": "integer"
+                },
+                "sizeRange": {
+                    "description": "大小范围，格式为\"\u003c100KB\",\"100KB-500KB\",\"500KB-1MB\",\"\u003e1MB\"",
+                    "type": "string"
+                }
+            }
+        },
+        "analyze.SpaceTagAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "queryAll": {
+                    "description": "是否查询所有空间",
+                    "type": "boolean"
+                },
+                "queryPublic": {
+                    "description": "是否查询公开空间",
+                    "type": "boolean"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "analyze.SpaceTagAnalyzeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "标签数量",
+                    "type": "integer"
+                },
+                "tag": {
+                    "description": "标签名称",
+                    "type": "string"
+                }
+            }
+        },
+        "analyze.SpaceUsageAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "queryAll": {
+                    "description": "是否查询所有空间",
+                    "type": "boolean"
+                },
+                "queryPublic": {
+                    "description": "是否查询公开空间",
+                    "type": "boolean"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "analyze.SpaceUsageAnalyzeResponse": {
+            "type": "object",
+            "properties": {
+                "countUsageRatio": {
+                    "description": "资源数量使用比例",
+                    "type": "number"
+                },
+                "maxCount": {
+                    "description": "最大资源数量",
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "description": "最大空间大小",
+                    "type": "integer"
+                },
+                "sizeUsageRatio": {
+                    "description": "空间使用比例",
+                    "type": "number"
+                },
+                "usedCount": {
+                    "description": "已使用的资源数量",
+                    "type": "integer"
+                },
+                "usedSize": {
+                    "description": "已使用的空间大小",
+                    "type": "integer"
+                }
+            }
+        },
+        "analyze.SpaceUserAnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "queryAll": {
+                    "description": "是否查询所有空间",
+                    "type": "boolean"
+                },
+                "queryPublic": {
+                    "description": "是否查询公开空间",
+                    "type": "boolean"
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "timeDimension": {
+                    "description": "时间维度：day/week/month",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "analyze.SpaceUserAnalyzeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "周期内上传的图片数量",
+                    "type": "integer"
+                },
+                "period": {
+                    "description": "时间周期",
+                    "type": "string"
+                }
+            }
+        },
         "common.DeleteRequest": {
             "type": "object",
             "required": [
