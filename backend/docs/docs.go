@@ -512,6 +512,104 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/picture/out_painting/create_task": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "获取AI扩图任务信息「登录校验」",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务的ID",
+                        "name": "taskId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功，返回任务进展信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/picture.GetOutPaintingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "picture"
+                ],
+                "summary": "创建AI扩图任务请求「登录校验」",
+                "parameters": [
+                    {
+                        "description": "创建扩图任务所需信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/picture.CreateOutPaintingTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功，返回任务信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/picture.CreateOutPaintingTaskResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/picture/review": {
             "post": {
                 "consumes": [
@@ -1949,6 +2047,123 @@ const docTemplate = `{
                 }
             }
         },
+        "picture.CreateOutPaintingTaskRequest": {
+            "type": "object",
+            "properties": {
+                "parameters": {
+                    "description": "图像处理任务的参数",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/picture.ImageParameters"
+                        }
+                    ]
+                },
+                "pictureId": {
+                    "description": "图片ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "picture.CreateOutPaintingTaskResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "错误码（失败时返回）",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "错误信息（失败时返回）",
+                    "type": "string"
+                },
+                "output": {
+                    "description": "任务输出信息（成功时返回）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/picture.Output"
+                        }
+                    ]
+                },
+                "requestId": {
+                    "description": "请求唯一标识符",
+                    "type": "string"
+                }
+            }
+        },
+        "picture.GetOutPaintingResponse": {
+            "type": "object",
+            "properties": {
+                "output": {
+                    "description": "任务输出信息（一定包含）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/picture.TaskDetailOutput"
+                        }
+                    ]
+                },
+                "requestId": {
+                    "description": "请求唯一标识",
+                    "type": "string"
+                },
+                "usage": {
+                    "description": "图像统计信息（仅在成功时返回）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/picture.Usage"
+                        }
+                    ]
+                }
+            }
+        },
+        "picture.ImageParameters": {
+            "type": "object",
+            "properties": {
+                "addWatermark": {
+                    "description": "是否添加水印",
+                    "type": "boolean"
+                },
+                "angle": {
+                    "description": "图像旋转角度（单位：度）",
+                    "type": "integer"
+                },
+                "bestQuality": {
+                    "description": "是否启用最佳质量",
+                    "type": "boolean"
+                },
+                "bottomOffset": {
+                    "description": "图像底部的偏移量",
+                    "type": "integer"
+                },
+                "leftOffset": {
+                    "description": "图像左侧的偏移量",
+                    "type": "integer"
+                },
+                "limitImageSize": {
+                    "description": "是否限制图像大小",
+                    "type": "boolean"
+                },
+                "outputRatio": {
+                    "description": "输出图像的宽高比（例如：\"16:9\"）",
+                    "type": "string"
+                },
+                "rightOffset": {
+                    "description": "图像右侧的偏移量",
+                    "type": "integer"
+                },
+                "topOffset": {
+                    "description": "图像顶部的偏移量",
+                    "type": "integer"
+                },
+                "xScale": {
+                    "description": "图像的水平缩放比例，范围在1.0 ~ 3.0",
+                    "type": "number"
+                },
+                "yScale": {
+                    "description": "图像的垂直缩放比例，范围在1.0 ~ 3.0",
+                    "type": "number"
+                }
+            }
+        },
         "picture.ListPictureResponse": {
             "type": "object",
             "properties": {
@@ -2000,6 +2215,19 @@ const docTemplate = `{
                 "total": {
                     "description": "总记录数",
                     "type": "integer"
+                }
+            }
+        },
+        "picture.Output": {
+            "type": "object",
+            "properties": {
+                "taskId": {
+                    "description": "任务的唯一标识符",
+                    "type": "string"
+                },
+                "taskStatus": {
+                    "description": "任务状态：PENDING、RUNNING、SUSPENDED、SUCCEEDED、FAILED、UNKNOWN",
+                    "type": "string"
                 }
             }
         },
@@ -2353,6 +2581,77 @@ const docTemplate = `{
                 "userId": {
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "picture.TaskDetailOutput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "错误码（失败时返回）",
+                    "type": "string"
+                },
+                "endTime": {
+                    "description": "任务完成时间（成功或失败时返回）",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "错误信息（失败时返回）",
+                    "type": "string"
+                },
+                "outputImageUrl": {
+                    "description": "输出图像的 URL（成功时返回）",
+                    "type": "string"
+                },
+                "scheduledTime": {
+                    "description": "任务调度时间（成功或失败时返回）",
+                    "type": "string"
+                },
+                "submitTime": {
+                    "description": "任务提交时间（成功或失败时返回）",
+                    "type": "string"
+                },
+                "taskId": {
+                    "description": "任务的唯一标识符",
+                    "type": "string"
+                },
+                "taskMetrics": {
+                    "description": "任务结果统计（执行中时返回）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/picture.TaskMetrics"
+                        }
+                    ]
+                },
+                "taskStatus": {
+                    "description": "任务状态：PENDING、RUNNING、SUSPENDED、SUCCEEDED、FAILED、UNKNOWN",
+                    "type": "string"
+                }
+            }
+        },
+        "picture.TaskMetrics": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "description": "失败任务数",
+                    "type": "integer"
+                },
+                "succeeded": {
+                    "description": "成功任务数",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总任务数",
+                    "type": "integer"
+                }
+            }
+        },
+        "picture.Usage": {
+            "type": "object",
+            "properties": {
+                "imageCount": {
+                    "description": "生成的图片数量",
+                    "type": "integer"
                 }
             }
         },

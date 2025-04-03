@@ -1,6 +1,7 @@
 package service
 
 import (
+	aliFetcher "chg/internal/api/aliyunai/fetcher"
 	"chg/internal/common"
 	"chg/internal/consts"
 	"chg/internal/ecode"
@@ -20,6 +21,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"gorm.io/gorm"
 	"log"
 	"math/rand/v2"
 	"mime/multipart"
@@ -29,9 +32,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
-	"github.com/PuerkitoBio/goquery"
-	"gorm.io/gorm"
 )
 
 type PictureService struct {
@@ -146,8 +146,8 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 	//开启事务
 	tx := s.PictureRepo.BeginTransaction()
 	//进行插入或者更新操作，即save
-	errr := s.PictureRepo.SavePicture(tx, pic)
-	if errr != nil {
+	originErr := s.PictureRepo.SavePicture(tx, pic)
+	if originErr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	//修改空间的额度
@@ -162,8 +162,8 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		}
 	}
 	//提交事务
-	errr = tx.Commit().Error
-	if err != nil {
+	originErr = tx.Commit().Error
+	if originErr != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	userVO := resUser.GetUserVO(*loginUser)
@@ -333,14 +333,14 @@ func (s *PictureService) DeletePicture(loginUser *entity.User, deleReq *common.D
 	//开启事务
 	tx := s.PictureRepo.BeginTransaction()
 	//进行删除图片操作
-	errr := s.PictureRepo.DeleteById(tx, deleReq.Id)
-	if errr != nil {
+	originErr := s.PictureRepo.DeleteById(tx, deleReq.Id)
+	if originErr != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	var space *entity.Space
 	if oldPic.SpaceID != 0 {
-		space, errr = repository.NewSpaceRepository().GetSpaceById(nil, oldPic.SpaceID)
-		if errr != nil {
+		space, originErr = repository.NewSpaceRepository().GetSpaceById(nil, oldPic.SpaceID)
+		if originErr != nil {
 			return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 		}
 	}
@@ -356,7 +356,7 @@ func (s *PictureService) DeletePicture(loginUser *entity.User, deleReq *common.D
 		}
 	}
 	//提交事务
-	errr = tx.Commit().Error
+	originErr = tx.Commit().Error
 	if err != nil {
 		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
@@ -761,4 +761,45 @@ func (s *PictureService) fillPictureNameWithRule(pic []entity.Picture, nameRule 
 		pic[i].Name = strings.Replace(nameRule, "{序号}", fmt.Sprintf("%d", index), -1)
 		index++
 	}
+}
+
+// 创建AI扩图任务
+func (s *PictureService) CreatePictureOutPaintingTask(req *reqPicture.CreateOutPaintingTaskRequest, loginUser *entity.User) (*resPicture.CreateOutPaintingTaskResponse, *ecode.ErrorWithCode) {
+	//1.参数校验
+	if req.PictureID <= 0 {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "图片ID不能为空")
+	}
+	pic, err := s.GetPictureById(req.PictureID)
+	if err != nil {
+		return nil, err
+	}
+	//2.权限校验
+	err = s.CheckPictureAuth(loginUser, pic)
+	if err != nil {
+		return nil, err
+	}
+	//3.创建任务
+	//将前端请求转化为阿里云API请求
+	createOutPaintReq := req.ToAliAiRequest(pic.URL)
+	//发送任务
+	res, err := aliFetcher.CreateOutPaintingTask(createOutPaintReq)
+	if err != nil {
+		return nil, err
+	}
+	//4.返回结果
+	return resPicture.AOutPaintResToF(res), nil
+}
+
+func (s *PictureService) GetOutPaintingTaskResponse(taskId string) (*resPicture.GetOutPaintingResponse, *ecode.ErrorWithCode) {
+	//1.参数校验
+	if taskId == "" {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "任务ID不能为空")
+	}
+	//2.获取任务状态
+	res, err := aliFetcher.GetOutPaintingTaskResponse(taskId)
+	if err != nil {
+		return nil, err
+	}
+	//3.返回结果
+	return resPicture.AGetOutPaintResToF(res), nil
 }

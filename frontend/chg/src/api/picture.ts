@@ -125,6 +125,42 @@ export async function postPictureListPageVoCache(
   )
 }
 
+/** 获取AI扩图任务信息「登录校验」 GET /v1/picture/out_painting/create_task */
+export async function getPictureOutPaintingCreateTask(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getPictureOutPaintingCreateTaskParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.GetOutPaintingResponse }>(
+    '/v1/picture/out_painting/create_task',
+    {
+      method: 'GET',
+      params: {
+        ...params,
+      },
+      ...(options || {}),
+    }
+  )
+}
+
+/** 创建AI扩图任务请求「登录校验」 POST /v1/picture/out_painting/create_task */
+export async function postPictureOutPaintingCreateTask(
+  body: API.CreateOutPaintingTaskRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.Response & { data?: API.CreateOutPaintingTaskResponse }>(
+    '/v1/picture/out_painting/create_task',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: body,
+      ...(options || {}),
+    }
+  )
+}
+
 /** 执行图片审核「管理员」 POST /v1/picture/review */
 export async function postPictureReview(
   body: API.PictureReviewRequest,

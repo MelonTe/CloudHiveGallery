@@ -25,6 +25,9 @@ type Config struct {
 		Port     int    `mapstructure:"port"`
 		Password string `mapstructure:"password"`
 	}
+	AliYunAi struct {
+		ApiKey string `mapstructure:"apiKey"`
+	}
 }
 
 var config *Config
