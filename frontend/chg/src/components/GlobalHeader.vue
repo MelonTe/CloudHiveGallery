@@ -62,6 +62,7 @@
 import { computed, h, ref } from 'vue'
 import {
   HomeOutlined,
+  UserOutlined
 } from '@ant-design/icons-vue'
 import { message, type MenuProps } from 'ant-design-vue'
 import { useRouter } from 'vue-router'

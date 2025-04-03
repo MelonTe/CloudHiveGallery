@@ -33,5 +33,5 @@ func init() {
 	entity.AutoMigrateSpace(db)
 }
 func LoadDB() *gorm.DB {
-	return db
+	return db.Session(&gorm.Session{})
 }
