@@ -7,6 +7,7 @@ import (
 	reqSpace "chg/internal/model/request/space"
 	resSpace "chg/internal/model/response/space"
 	"chg/internal/service"
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -175,7 +176,7 @@ func AddSpace(c *gin.Context) {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
-	common.Success(c, spaceId)
+	common.Success(c, fmt.Sprintf("%d", spaceId))
 }
 
 // ListSpaceLevel godoc

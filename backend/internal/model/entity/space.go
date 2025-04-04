@@ -18,6 +18,7 @@ type Space struct {
 	EditTime   time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP;not null;comment:编辑时间" json:"editTime"`
 	UpdateTime time.Time      `gorm:"autoUpdateTime;comment:更新时间" json:"updateTime"`
 	IsDelete   gorm.DeletedAt `gorm:"comment:是否删除" json:"isDelete" swaggerignore:"true"`
+	SpaceType  int            `gorm:"default:0;comment:空间类型：0-个人空间 1-团队空间;index:idx_spaceType" json:"spaceType"`
 }
 
 // AutoMigrateSpace 执行数据库迁移

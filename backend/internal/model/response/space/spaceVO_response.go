@@ -19,6 +19,7 @@ type SpaceVO struct {
 	EditTime   time.Time      `json:"editTime"`
 	UpdateTime time.Time      `json:"updateTime"`
 	User       resUser.UserVO `json:"user"`
+	SpaceType  int            `json:"spaceType"` // Space type: 0 - 私人空间, 1 - 团队空间
 }
 
 // Convert SpaceVO to entity.Space
@@ -35,6 +36,7 @@ func VOToEntity(vo SpaceVO) entity.Space {
 		CreateTime: vo.CreateTime,
 		EditTime:   vo.EditTime,
 		UpdateTime: vo.UpdateTime,
+		SpaceType:  vo.SpaceType,
 	}
 }
 
@@ -53,5 +55,6 @@ func EntityToVO(entity entity.Space, userVO resUser.UserVO) SpaceVO {
 		EditTime:   entity.EditTime,
 		UpdateTime: entity.UpdateTime,
 		User:       userVO,
+		SpaceType:  entity.SpaceType,
 	}
 }

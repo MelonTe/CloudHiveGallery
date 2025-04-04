@@ -32,6 +32,12 @@ var (
 	LastSpaceLevel  = FLAGSHIP.Value // 最高的空间等级为旗舰版
 )
 
+//定义空间类型常量
+const (
+	SPACE_PRIVATE = 0 // 私人空间
+	SPACE_TEAM    = 1 // 团队空间
+)
+
 // GetSpaceLevelByValue 根据等级值获取对应的 SpaceLevel。
 func GetSpaceLevelByValue(value int) *SpaceLevel {
 	switch value {
@@ -43,5 +49,15 @@ func GetSpaceLevelByValue(value int) *SpaceLevel {
 		return &FLAGSHIP
 	default:
 		return nil // 如果没有匹配的等级值，返回 nil
+	}
+}
+
+//校验空间类型是否合法
+func IsSpaceTypeValid(spaceType int) bool {
+	switch spaceType {
+	case SPACE_PRIVATE, SPACE_TEAM:
+		return true // 合法的空间类型
+	default:
+		return false // 非法的空间类型
 	}
 }

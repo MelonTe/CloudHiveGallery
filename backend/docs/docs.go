@@ -1692,6 +1692,307 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/spaceUser/add": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "增加成员到空间",
+                "parameters": [
+                    {
+                        "description": "成员的ID和空间ID，以及添加的成员角色",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/spaceuser.SpaceUserAddRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回空间成员表的数据ID，字符串格式",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/spaceUser/delete": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "从空间移除成员",
+                "parameters": [
+                    {
+                        "description": "空间成员表中数据的ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/spaceuser.SpaceUserRemoveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回成功与否",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/spaceUser/edit": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "编辑成员信息",
+                "parameters": [
+                    {
+                        "description": "记录的ID和需要调整的权限",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/spaceuser.SpaceUserEditRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "编辑成功与否",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/spaceUser/get": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "查询某个成员在某个空间的信息",
+                "parameters": [
+                    {
+                        "description": "必须携带spaceID和userID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/spaceuser.SpaceUserQueryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回成功与否",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.SpaceUser"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/spaceUser/list": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "查询成员信息列表",
+                "parameters": [
+                    {
+                        "description": "可以携带的参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/spaceuser.SpaceUserQueryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回详细数据",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/spaceuser.SpaceUserVO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/spaceUser/list/my": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaceUser"
+                ],
+                "summary": "查询我加入的团队空间列表",
+                "responses": {
+                    "200": {
+                        "description": "返回详细数据",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/spaceuser.SpaceUserVO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/add": {
             "post": {
                 "description": "默认密码为12345678",
@@ -2497,11 +2798,40 @@ const docTemplate = `{
                 "spaceName": {
                     "type": "string"
                 },
+                "spaceType": {
+                    "type": "integer"
+                },
                 "totalCount": {
                     "type": "integer"
                 },
                 "totalSize": {
                     "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "entity.SpaceUser": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceId": {
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceRole": {
+                    "type": "string"
                 },
                 "updateTime": {
                     "type": "string"
@@ -3233,6 +3563,10 @@ const docTemplate = `{
                 "spaceName": {
                     "description": "空间名称",
                     "type": "string"
+                },
+                "spaceType": {
+                    "description": "空间类型：0-个人空间 1-团队空间",
+                    "type": "integer"
                 }
             }
         },
@@ -3303,6 +3637,10 @@ const docTemplate = `{
                     "description": "空间名称",
                     "type": "string"
                 },
+                "spaceType": {
+                    "description": "空间类型：0-个人空间 1-团队空间 使用指针来区分0和未传参",
+                    "type": "integer"
+                },
                 "userId": {
                     "description": "用户 ID",
                     "type": "string",
@@ -3362,6 +3700,10 @@ const docTemplate = `{
                 "spaceName": {
                     "type": "string"
                 },
+                "spaceType": {
+                    "description": "Space type: 0 - 私人空间, 1 - 团队空间",
+                    "type": "integer"
+                },
                 "totalCount": {
                     "type": "integer"
                 },
@@ -3376,6 +3718,115 @@ const docTemplate = `{
                 },
                 "userId": {
                     "description": "User ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "spaceuser.SpaceUserAddRequest": {
+            "type": "object",
+            "properties": {
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceRole": {
+                    "description": "空间角色：viewer-查看者 editor-编辑者 admin-管理员",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "spaceuser.SpaceUserEditRequest": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "description": "表的元组ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceRole": {
+                    "description": "空间角色：viewer-查看者 editor-编辑者 admin-管理员",
+                    "type": "string"
+                }
+            }
+        },
+        "spaceuser.SpaceUserQueryRequest": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "description": "表的元组ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceId": {
+                    "description": "空间ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceRole": {
+                    "description": "空间角色：viewer-查看者 editor-编辑者 admin-管理员",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "spaceuser.SpaceUserRemoveRequest": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "description": "表的元组ID",
+                    "type": "string",
+                    "example": ""
+                }
+            }
+        },
+        "spaceuser.SpaceUserVO": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": ""
+                },
+                "space": {
+                    "description": "空间信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/space.SpaceVO"
+                        }
+                    ]
+                },
+                "spaceId": {
+                    "type": "string",
+                    "example": ""
+                },
+                "spaceRole": {
+                    "type": "string"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "用户信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/user.UserVO"
+                        }
+                    ]
+                },
+                "userId": {
                     "type": "string",
                     "example": ""
                 }

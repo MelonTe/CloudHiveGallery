@@ -203,6 +203,9 @@ func (s *SpaceService) GetQueryWrapper(db *gorm.DB, req *reqSpace.SpaceQueryRequ
 	if req.SpaceLevel != nil {
 		query = query.Where("space_level = ?", *req.SpaceLevel)
 	}
+	if req.SpaceType != nil {
+		query = query.Where("space_type = ?", *req.SpaceType)
+	}
 	if req.SortField != "" {
 		sortOrder := "ASC"
 		if req.SortOrder == "descend" {
@@ -223,10 +226,14 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 	if spaceLevel == nil {
 		spaceLevel = consts.GetSpaceLevelByValue(consts.COMMON.Value) //默认为0级别空间
 	}
+	if spaceTypeValid := consts.IsSpaceTypeValid(addRequest.SpaceType); !spaceTypeValid {
+		return 0, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "空间类型错误")
+	}
 	//实体类创建
 	space := &entity.Space{
 		SpaceName:  addRequest.SpaceName,
 		SpaceLevel: addRequest.SpaceLevel,
+		SpaceType:  addRequest.SpaceType,
 	}
 	//参数填充
 	s.FillSpaceByLevel(space)
@@ -235,7 +242,7 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 	if spaceLevel.Value != addRequest.SpaceLevel && !(loginUser.UserRole != consts.ADMIN_ROLE) {
 		return 0, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "无权限创建指定级别的空间")
 	}
-	//3.锁+事务，保证同一用户只能创建一个空间
+	//3.锁+事务，保证同一用户只能创建一个空间，以及只能创建一个团队空间
 	rs := redlock.GetRedSync()
 	lock := rs.NewMutex(strconv.FormatUint(loginUser.ID, 10))
 	//加锁，超时时间默认8s
@@ -244,14 +251,22 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 	//开启事务
 	tx := s.SpaceRepo.BeginTransaction()
 	//进行数据库校验，查看是否存在数据
-	exist := s.SpaceRepo.IsExistByUserId(tx, loginUser.ID)
+	exist := s.SpaceRepo.IsExistByUserId(tx, loginUser.ID, addRequest.SpaceType)
 	if exist {
-		return 0, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "已经存在空间")
+		return 0, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "每个用户每类空间只允许创建一个")
 	}
 	//写入数据库
 	err := s.SpaceRepo.SaveSpace(tx, space)
 	if err != nil {
 		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	}
+	//若是团队空间，需要在space_user表插入当前创建人的信息
+	if space.SpaceType == consts.SPACE_TEAM {
+		tx.Model(&entity.SpaceUser{}).Save(&entity.SpaceUser{
+			SpaceID:   space.ID,
+			UserID:    loginUser.ID,
+			SpaceRole: consts.ADMIN,
+		})
 	}
 	//提交事务
 	err = tx.Commit().Error

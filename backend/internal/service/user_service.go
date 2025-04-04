@@ -27,7 +27,7 @@ func NewUserService() *UserService {
 	}
 }
 
-// 根据id获取用户
+// 根据id获取用户，不存在返回错误
 func (s *UserService) GetUserById(id uint64) (*entity.User, *ecode.ErrorWithCode) {
 	user, err := s.UserRepo.FindById(nil, id)
 	if err != nil {
