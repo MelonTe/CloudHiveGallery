@@ -223,10 +223,30 @@ definitions:
         type: integer
       spaceName:
         type: string
+      spaceType:
+        type: integer
       totalCount:
         type: integer
       totalSize:
         type: integer
+      updateTime:
+        type: string
+      userId:
+        example: ""
+        type: string
+    type: object
+  entity.SpaceUser:
+    properties:
+      createTime:
+        type: string
+      id:
+        example: ""
+        type: string
+      spaceId:
+        example: ""
+        type: string
+      spaceRole:
+        type: string
       updateTime:
         type: string
       userId:
@@ -734,6 +754,9 @@ definitions:
       spaceName:
         description: 空间名称
         type: string
+      spaceType:
+        description: 空间类型：0-个人空间 1-团队空间
+        type: integer
     type: object
   space.SpaceEditRequest:
     properties:
@@ -784,6 +807,9 @@ definitions:
       spaceName:
         description: 空间名称
         type: string
+      spaceType:
+        description: 空间类型：0-个人空间 1-团队空间 使用指针来区分0和未传参
+        type: integer
       userId:
         description: 用户 ID
         example: ""
@@ -826,6 +852,9 @@ definitions:
         type: integer
       spaceName:
         type: string
+      spaceType:
+        description: 'Space type: 0 - 私人空间, 1 - 团队空间'
+        type: integer
       totalCount:
         type: integer
       totalSize:
@@ -836,6 +865,81 @@ definitions:
         $ref: '#/definitions/user.UserVO'
       userId:
         description: User ID
+        example: ""
+        type: string
+    type: object
+  spaceuser.SpaceUserAddRequest:
+    properties:
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+      spaceRole:
+        description: 空间角色：viewer-查看者 editor-编辑者 admin-管理员
+        type: string
+      userId:
+        description: 用户ID
+        example: ""
+        type: string
+    type: object
+  spaceuser.SpaceUserEditRequest:
+    properties:
+      Id:
+        description: 表的元组ID
+        example: ""
+        type: string
+      spaceRole:
+        description: 空间角色：viewer-查看者 editor-编辑者 admin-管理员
+        type: string
+    type: object
+  spaceuser.SpaceUserQueryRequest:
+    properties:
+      Id:
+        description: 表的元组ID
+        example: ""
+        type: string
+      spaceId:
+        description: 空间ID
+        example: ""
+        type: string
+      spaceRole:
+        description: 空间角色：viewer-查看者 editor-编辑者 admin-管理员
+        type: string
+      userId:
+        description: 用户ID
+        example: ""
+        type: string
+    type: object
+  spaceuser.SpaceUserRemoveRequest:
+    properties:
+      Id:
+        description: 表的元组ID
+        example: ""
+        type: string
+    type: object
+  spaceuser.SpaceUserVO:
+    properties:
+      createTime:
+        type: string
+      id:
+        example: ""
+        type: string
+      space:
+        allOf:
+        - $ref: '#/definitions/space.SpaceVO'
+        description: 空间信息
+      spaceId:
+        example: ""
+        type: string
+      spaceRole:
+        type: string
+      updateTime:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/user.UserVO'
+        description: 用户信息
+      userId:
         example: ""
         type: string
     type: object
@@ -1996,6 +2100,183 @@ paths:
       summary: 更新空间「管理员」
       tags:
       - space
+  /v1/spaceUser/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 成员的ID和空间ID，以及添加的成员角色
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceuser.SpaceUserAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回空间成员表的数据ID，字符串格式
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 增加成员到空间
+      tags:
+      - spaceUser
+  /v1/spaceUser/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 空间成员表中数据的ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceuser.SpaceUserRemoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功与否
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 从空间移除成员
+      tags:
+      - spaceUser
+  /v1/spaceUser/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 记录的ID和需要调整的权限
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceuser.SpaceUserEditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 编辑成功与否
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 编辑成员信息
+      tags:
+      - spaceUser
+  /v1/spaceUser/get:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 必须携带spaceID和userID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceuser.SpaceUserQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功与否
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.SpaceUser'
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 查询某个成员在某个空间的信息
+      tags:
+      - spaceUser
+  /v1/spaceUser/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 可以携带的参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceuser.SpaceUserQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回详细数据
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/spaceuser.SpaceUserVO'
+                  type: array
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 查询成员信息列表
+      tags:
+      - spaceUser
+  /v1/spaceUser/list/my:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回详细数据
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/spaceuser.SpaceUserVO'
+                  type: array
+              type: object
+        "400":
+          description: 查询失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 查询我加入的团队空间列表
+      tags:
+      - spaceUser
   /v1/user/add:
     post:
       consumes:

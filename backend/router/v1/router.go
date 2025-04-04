@@ -72,5 +72,14 @@ func RegisterV1Routes(r *gin.Engine) {
 			spaceAnalyzeAPI.POST("/user", middleware.LoginCheck(service.NewUserService()), controller.GetSpaceUserAnalyze)
 			spaceAnalyzeAPI.POST("/rank", middleware.AuthCheck(service.NewUserService(), consts.ADMIN_ROLE), controller.GetSpaceRankAnalyze)
 		}
+		spaceUserAPI := apiV1.Group("/spaceUser")
+		{
+			spaceUserAPI.POST("/add", controller.AddSpaceUser)
+			spaceUserAPI.POST("/delete", controller.DeleteSpaceUser)
+			spaceUserAPI.POST("/get", controller.GetSpaceUser)
+			spaceUserAPI.POST("/list", controller.ListSpaceUser)
+			spaceUserAPI.POST("/edit", controller.EditSpaceUser)
+			spaceUserAPI.POST("/list/my", controller.ListMyTeamSpace)
+		}
 	}
 }

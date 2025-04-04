@@ -67,12 +67,12 @@ func (r *SpaceRepository) UpdateSpaceById(tx *gorm.DB, id uint64, updateMap map[
 	return tx.Model(&entity.Space{ID: id}).Updates(updateMap).Error
 }
 
-// 根据用户ID判断空间是否存在
-func (r *SpaceRepository) IsExistByUserId(tx *gorm.DB, userId uint64) bool {
+// 根据用户ID判断空间是否存在，需要判断是私有空间还是团队空间
+func (r *SpaceRepository) IsExistByUserId(tx *gorm.DB, userId uint64, spaceType int) bool {
 	if tx == nil {
 		tx = r.db
 	}
 	var exists bool
-	tx.Raw("select exists(select 1 from spaces where user_id = ?)", userId).Scan(&exists)
+	tx.Raw("select exists(select 1 from spaces where user_id = ? and space_type = ?)", userId, spaceType).Scan(&exists)
 	return exists
 }

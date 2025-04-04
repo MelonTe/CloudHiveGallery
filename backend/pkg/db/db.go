@@ -4,11 +4,10 @@ import (
 	"chg/config"
 	"chg/internal/model/entity"
 	"fmt"
-	"log"
-
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"log"
 )
 
 var db *gorm.DB
@@ -31,6 +30,7 @@ func init() {
 	entity.AutoMigrateUser(db)
 	entity.AutoMigratePicture(db)
 	entity.AutoMigrateSpace(db)
+	entity.AutoMigrateSpaceUser(db)
 }
 func LoadDB() *gorm.DB {
 	return db.Session(&gorm.Session{})
