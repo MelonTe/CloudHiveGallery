@@ -1,0 +1,17 @@
+# 对图片的权限分为四种：编辑、查阅、删除、上传
+p, editor, picture, edit
+p, editor, picture, view
+p, editor, picture, delete
+p, editor, picture, upload
+
+p, viewer, picture, view
+
+#对团队空间的权限为manage，可以进行管理空间成员，删除、添加
+p, admin, spaceUser, manage
+p, admin, picture, edit
+p, admin, picture, view
+p, admin, picture, delete
+p, admin, picture, upload
+
+#测试
+g,user_557094266849998849,admin,global

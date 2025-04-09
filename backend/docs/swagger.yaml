@@ -628,6 +628,11 @@ definitions:
         type: string
       name:
         type: string
+      permissionList:
+        description: 空间的权限列表
+        items:
+          type: string
+        type: array
       picColor:
         type: string
       picFormat:
@@ -848,6 +853,11 @@ definitions:
         type: integer
       maxSize:
         type: integer
+      permissionList:
+        description: 空间的权限列表
+        items:
+          type: string
+        type: array
       spaceLevel:
         type: integer
       spaceName:
@@ -1954,7 +1964,7 @@ paths:
           description: 更新失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 编辑空间
+      summary: 编辑空间昵称
       tags:
       - space
   /v1/space/get/vo:
@@ -1983,7 +1993,7 @@ paths:
           description: 查询失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 获取当个空间的视图信息
+      summary: 获取当个空间的视图信息「登录校验」
       tags:
       - space
   /v1/space/list/level:
@@ -2187,7 +2197,7 @@ paths:
           description: 查询失败，详情见响应中的code
           schema:
             $ref: '#/definitions/common.Response'
-      summary: 编辑成员信息
+      summary: 编辑成员权限
       tags:
       - spaceUser
   /v1/spaceUser/get:

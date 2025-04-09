@@ -9,6 +9,7 @@ import (
 	resUser "chg/internal/model/response/user"
 	"chg/internal/repository"
 	"chg/pkg/argon2"
+	"chg/pkg/casbin"
 	"chg/pkg/db"
 	"chg/pkg/session"
 	"strings"
@@ -86,6 +87,9 @@ func (s *UserService) UserRegister(userAccount, userPassword, checkPassword stri
 	if err = s.UserRepo.CreateUser(nil, user); err != nil {
 		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误，注册失败")
 	}
+	//5.添加RBAC权限，新用户为在public域下的viewer
+	casClient := casbin.LoadCasbinMethod()
+	casbin.UpdateUserRoleInDomain(casClient, user.ID, consts.SPACEROLE_VIEWER, consts.DOM_PUBLIC)
 	return user.ID, nil
 }
 

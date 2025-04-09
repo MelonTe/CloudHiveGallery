@@ -1409,7 +1409,7 @@ const docTemplate = `{
                 "tags": [
                     "space"
                 ],
-                "summary": "编辑空间",
+                "summary": "编辑空间昵称",
                 "parameters": [
                     {
                         "description": "需要更新的空间信息",
@@ -1460,7 +1460,7 @@ const docTemplate = `{
                 "tags": [
                     "space"
                 ],
-                "summary": "获取当个空间的视图信息",
+                "summary": "获取当个空间的视图信息「登录校验」",
                 "parameters": [
                     {
                         "type": "string",
@@ -1805,7 +1805,7 @@ const docTemplate = `{
                 "tags": [
                     "spaceUser"
                 ],
-                "summary": "编辑成员信息",
+                "summary": "编辑成员权限",
                 "parameters": [
                     {
                         "description": "记录的ID和需要调整的权限",
@@ -3382,6 +3382,13 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "permissionList": {
+                    "description": "空间的权限列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "picColor": {
                     "type": "string"
                 },
@@ -3693,6 +3700,13 @@ const docTemplate = `{
                 },
                 "maxSize": {
                     "type": "integer"
+                },
+                "permissionList": {
+                    "description": "空间的权限列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "spaceLevel": {
                     "type": "integer"

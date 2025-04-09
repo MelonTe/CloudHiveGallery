@@ -8,25 +8,26 @@ import (
 )
 
 type PictureVO struct {
-	ID           uint64         `json:"id,string"`
-	URL          string         `json:"url"`
-	ThumbnailURL string         `json:"thumbnailUrl"`
-	Name         string         `json:"name"`
-	Introduction string         `json:"introduction"`
-	Category     string         `json:"category"`
-	Tags         []string       `json:"tags" comment:"标签，将json转化为string数组"`
-	PicSize      int64          `json:"picSize"`
-	PicWidth     int            `json:"picWidth"`
-	PicHeight    int            `json:"picHeight"`
-	PicScale     float64        `json:"picScale"`
-	PicFormat    string         `json:"picFormat"`
-	UserID       uint64         `json:"userId,string", swaggertype:"string"`
-	EditTime     time.Time      `json:"editTime"`
-	CreateTime   time.Time      `json:"createTime"`
-	UpdateTime   time.Time      `json:"updateTime"`
-	User         resUser.UserVO `json:"user" comment:"用户信息"`
-	SpaceID      uint64         `json:"spaceId,string" comment:"空间ID"`
-	PicColor     string         `json:"picColor"`
+	ID             uint64         `json:"id,string"`
+	URL            string         `json:"url"`
+	ThumbnailURL   string         `json:"thumbnailUrl"`
+	Name           string         `json:"name"`
+	Introduction   string         `json:"introduction"`
+	Category       string         `json:"category"`
+	Tags           []string       `json:"tags" comment:"标签，将json转化为string数组"`
+	PicSize        int64          `json:"picSize"`
+	PicWidth       int            `json:"picWidth"`
+	PicHeight      int            `json:"picHeight"`
+	PicScale       float64        `json:"picScale"`
+	PicFormat      string         `json:"picFormat"`
+	UserID         uint64         `json:"userId,string", swaggertype:"string"`
+	EditTime       time.Time      `json:"editTime"`
+	CreateTime     time.Time      `json:"createTime"`
+	UpdateTime     time.Time      `json:"updateTime"`
+	User           resUser.UserVO `json:"user" comment:"用户信息"`
+	SpaceID        uint64         `json:"spaceId,string" comment:"空间ID"`
+	PicColor       string         `json:"picColor"`
+	PermissionList []string       `json:"permissionList"` // 空间的权限列表
 }
 
 // 封装类转化为数据库对象

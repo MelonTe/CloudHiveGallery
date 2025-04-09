@@ -9,6 +9,7 @@ import (
 	resSpace "chg/internal/model/response/space"
 	resUser "chg/internal/model/response/user"
 	"chg/internal/repository"
+	"chg/pkg/casbin"
 	"chg/pkg/db"
 	"chg/pkg/redlock"
 	"fmt"
@@ -238,8 +239,8 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 	//参数填充
 	s.FillSpaceByLevel(space)
 	space.UserID = loginUser.ID
-	//2.校验权限
-	if spaceLevel.Value != addRequest.SpaceLevel && !(loginUser.UserRole != consts.ADMIN_ROLE) {
+	//2.校验权限，只允许管理员创建指定级别的空间
+	if consts.COMMON.Value != addRequest.SpaceLevel && loginUser.UserRole != consts.ADMIN_ROLE {
 		return 0, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "无权限创建指定级别的空间")
 	}
 	//3.锁+事务，保证同一用户只能创建一个空间，以及只能创建一个团队空间
@@ -265,8 +266,16 @@ func (s *SpaceService) AddSpace(addRequest *reqSpace.SpaceAddRequest, loginUser 
 		tx.Model(&entity.SpaceUser{}).Save(&entity.SpaceUser{
 			SpaceID:   space.ID,
 			UserID:    loginUser.ID,
-			SpaceRole: consts.ADMIN,
+			SpaceRole: consts.SPACEROLE_ADMIN,
 		})
+	}
+	//记录创建者的权限
+	casClient := casbin.LoadCasbinMethod()
+	domain := fmt.Sprintf("space_%d", space.ID)
+	originErr := casbin.UpdateUserRoleInDomain(casClient, loginUser.ID, consts.ADMIN_ROLE, domain)
+	if originErr != nil {
+		log.Println("更新权限失败", originErr)
+		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "权限更新失败")
 	}
 	//提交事务
 	err = tx.Commit().Error

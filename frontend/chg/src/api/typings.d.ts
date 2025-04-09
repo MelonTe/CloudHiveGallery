@@ -315,6 +315,8 @@ declare namespace API {
     id?: string
     introduction?: string
     name?: string
+    /** 空间的权限列表 */
+    permissionList?: string[]
     picColor?: string
     picFormat?: string
     picHeight?: number
@@ -344,6 +346,7 @@ declare namespace API {
     maxSize?: number
     spaceLevel?: number
     spaceName?: string
+    spaceType?: number
     totalCount?: number
     totalSize?: number
     updateTime?: string
@@ -355,6 +358,8 @@ declare namespace API {
     spaceLevel?: number
     /** 空间名称 */
     spaceName?: string
+    /** 空间类型：0-个人空间 1-团队空间 */
+    spaceType?: number
   }
 
   type SpaceCategoryAnalyzeRequest = {
@@ -408,6 +413,8 @@ declare namespace API {
     spaceLevel?: number
     /** 空间名称 */
     spaceName?: string
+    /** 空间类型：0-个人空间 1-团队空间 使用指针来区分0和未传参 */
+    spaceType?: number
     /** 用户 ID */
     userId?: string
   }
@@ -486,6 +493,24 @@ declare namespace API {
     usedSize?: number
   }
 
+  type SpaceUser = {
+    createTime?: string
+    id?: string
+    spaceId?: string
+    spaceRole?: string
+    updateTime?: string
+    userId?: string
+  }
+
+  type SpaceUserAddRequest = {
+    /** 空间ID */
+    spaceId?: string
+    /** 空间角色：viewer-查看者 editor-编辑者 admin-管理员 */
+    spaceRole?: string
+    /** 用户ID */
+    userId?: string
+  }
+
   type SpaceUserAnalyzeRequest = {
     /** 是否查询所有空间 */
     queryAll?: boolean
@@ -506,6 +531,42 @@ declare namespace API {
     period?: string
   }
 
+  type SpaceUserEditRequest = {
+    /** 表的元组ID */
+    Id?: string
+    /** 空间角色：viewer-查看者 editor-编辑者 admin-管理员 */
+    spaceRole?: string
+  }
+
+  type SpaceUserQueryRequest = {
+    /** 表的元组ID */
+    Id?: string
+    /** 空间ID */
+    spaceId?: string
+    /** 空间角色：viewer-查看者 editor-编辑者 admin-管理员 */
+    spaceRole?: string
+    /** 用户ID */
+    userId?: string
+  }
+
+  type SpaceUserRemoveRequest = {
+    /** 表的元组ID */
+    Id?: string
+  }
+
+  type SpaceUserVO = {
+    createTime?: string
+    id?: string
+    /** 空间信息 */
+    space?: SpaceVO
+    spaceId?: string
+    spaceRole?: string
+    updateTime?: string
+    /** 用户信息 */
+    user?: UserVO
+    userId?: string
+  }
+
   type SpaceVO = {
     createTime?: string
     editTime?: string
@@ -513,8 +574,12 @@ declare namespace API {
     id?: string
     maxCount?: number
     maxSize?: number
+    /** 空间的权限列表 */
+    permissionList?: string[]
     spaceLevel?: number
     spaceName?: string
+    /** Space type: 0 - 私人空间, 1 - 团队空间 */
+    spaceType?: number
     totalCount?: number
     totalSize?: number
     updateTime?: string

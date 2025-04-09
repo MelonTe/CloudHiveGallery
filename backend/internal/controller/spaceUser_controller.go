@@ -127,7 +127,7 @@ func ListSpaceUser(c *gin.Context) {
 }
 
 // EditSpaceUser godoc
-// @Summary      编辑成员信息
+// @Summary      编辑成员权限
 // @Tags         spaceUser
 // @Accept       json
 // @Produce      json

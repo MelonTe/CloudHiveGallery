@@ -39,11 +39,11 @@
               <a-space class="card-actions" @click="(e) => doSearch(picture, e)">
                 <search-outlined />
               </a-space>
-              <a-space class="card-actions" @click="(e) => doEdit(picture, e)">
-                <edit-outlined />
+              <a-space v-if="canEdit" class="card-actions" @click="(e) => doEdit(picture, e)">
+                <edit-outlined  />
               </a-space>
-              <a-space class="card-actions" @click="(e) => doDelete(picture, e)">
-                <delete-outlined />
+              <a-space v-if="canDelete" class="card-actions" @click="(e) => doDelete(picture, e)">
+                <delete-outlined  />
               </a-space>
             </template>
           </a-card>
@@ -72,13 +72,18 @@ interface Props {
   loading?: boolean
   showOp?: boolean
   onReload?: () => void
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
   showOp: false,
+  canEdit: false,
+  canDelete: false,
 })
+
 
 // 跳转至图片详情
 const router = useRouter()

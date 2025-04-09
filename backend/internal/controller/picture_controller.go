@@ -6,12 +6,14 @@ import (
 	"chg/internal/common"
 	"chg/internal/consts"
 	"chg/internal/ecode"
+	"chg/internal/model/entity"
 	reqPicture "chg/internal/model/request/picture"
 	resPicture "chg/internal/model/response/picture"
 	"chg/internal/service"
-	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func dumb2() {
@@ -202,15 +204,24 @@ func GetPictureVOById(c *gin.Context) {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
-	//空间权限校验
-	if pic.SpaceID != 0 {
-		loginUser, _ := sUser.GetLoginUser(c)
-		if loginUser == nil || sPicture.CheckPictureAuth(loginUser, pic) != nil {
-			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
-			return
-		}
-	}
 	picVO := sPicture.GetPictureVO(pic)
+	//需要进行权限校验，防止跨空间访问
+	loginUser, _ := sUser.GetLoginUser(c)
+	if pic.SpaceID != 0 && loginUser == nil {
+		common.BaseResponse(c, nil, "没有权限", ecode.NO_AUTH_ERROR)
+		return
+	}
+	//若是空间的图片，则需要获取权限
+	var space *entity.Space
+	if picVO.SpaceID != 0 {
+		space, _ = sSpace.GetSpaceById(picVO.SpaceID)
+	}
+	picVO.PermissionList = service.GetPermissionList(space, loginUser)
+	//检查是否拥有读权限
+	if len(picVO.PermissionList) == 0 {
+		common.BaseResponse(c, nil, "没有权限", ecode.NO_AUTH_ERROR)
+		return
+	}
 	common.Success(c, *picVO)
 }
 
@@ -265,9 +276,20 @@ func ListPictureVOByPage(c *gin.Context) {
 			common.BaseResponse(c, nil, err.Msg, err.Code)
 			return
 		}
-		if space.UserID != loginUser.ID {
-			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
-			return
+		//区分私有空间和团队空间
+		switch space.SpaceType {
+		case consts.SPACE_PRIVATE:
+			if space.UserID != loginUser.ID {
+				common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+				return
+			}
+		case consts.SPACE_TEAM:
+			//团队空间，校验是否有权限
+			permissions := service.GetPermissionList(space, loginUser)
+			if len(permissions) == 0 {
+				common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+				return
+			}
 		}
 	} else {
 		//公开图库
@@ -283,6 +305,20 @@ func ListPictureVOByPage(c *gin.Context) {
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
+	}
+	//若是空间的图片，则需要获取权限
+	if len(pics.Records) != 0 {
+		var space *entity.Space
+		picVO := pics.Records[0]
+		if picVO.SpaceID != 0 {
+			space, _ = sSpace.GetSpaceById(picVO.SpaceID)
+		}
+		loginUser, _ := sUser.GetLoginUser(c)
+		PermissionList := service.GetPermissionList(space, loginUser)
+		//为每一个pic填充
+		for idx := range pics.Records {
+			pics.Records[idx].PermissionList = PermissionList
+		}
 	}
 	common.Success(c, *pics)
 }

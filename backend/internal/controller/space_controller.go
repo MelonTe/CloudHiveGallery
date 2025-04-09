@@ -6,6 +6,7 @@ import (
 	"chg/internal/ecode"
 	reqSpace "chg/internal/model/request/space"
 	resSpace "chg/internal/model/response/space"
+	resUser "chg/internal/model/response/user"
 	"chg/internal/service"
 	"fmt"
 	"strconv"
@@ -51,7 +52,7 @@ func UpdateSpace(c *gin.Context) {
 }
 
 // EditSpace godoc
-// @Summary      编辑空间
+// @Summary      编辑空间昵称
 // @Description  若空间不存在，则返回false
 // @Tags         space
 // @Accept       json
@@ -132,7 +133,7 @@ func ListSpaceVOByPage(c *gin.Context) {
 }
 
 // GetSpaceVOById godoc
-// @Summary      获取当个空间的视图信息
+// @Summary      获取当个空间的视图信息「登录校验」
 // @Tags         space
 // @Accept       json
 // @Produce      json
@@ -151,7 +152,11 @@ func GetSpaceVOById(c *gin.Context) {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
 	}
-	common.Success(c, *space)
+	loginUser, _ := sUser.GetLoginUser(c)
+	userVO := resUser.GetUserVO(*loginUser)
+	spaceVO := resSpace.EntityToVO(*space, userVO)
+	spaceVO.PermissionList = service.GetPermissionList(space, loginUser)
+	common.Success(c, spaceVO)
 }
 
 // AddSpace godoc
