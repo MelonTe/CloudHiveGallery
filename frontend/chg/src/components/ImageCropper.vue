@@ -52,11 +52,11 @@ const handleUpload = async ({file} : any) => {
       props.onSuccess?.(res.data.data);
       closeModal()
     } else{
-      message.error("图片上传失败，", + res.data.msg);
+      message.error("图片上传失败，" + res.data.msg);
     }
   }catch (error) {
     console.log("图片上传失败",error)
-    message.error("图片上传失败，"+ error.message);
+    message.error("图片上传失败，"+ error.msg);
   }
   loading.value = false;
 }

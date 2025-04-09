@@ -9,7 +9,9 @@ import (
 	resSpaceUser "chg/internal/model/response/spaceuser"
 	resUser "chg/internal/model/response/user"
 	"chg/internal/repository"
+	"chg/pkg/casbin"
 	"chg/pkg/db"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -32,6 +34,10 @@ func (s *SpaceUserService) AddSpaceUser(req *reqSpaceUser.SpaceUserAddRequest) (
 		UserID:    req.UserID,
 		SpaceRole: req.SpaceRole,
 	}
+	if req.SpaceRole == "" {
+		//默认为浏览者
+		spaceUser.SpaceRole = consts.SPACEROLE_VIEWER
+	}
 	if err := ValidSpaceUser(spaceUser, true); err != nil {
 		return 0, err
 	}
@@ -41,6 +47,9 @@ func (s *SpaceUserService) AddSpaceUser(req *reqSpaceUser.SpaceUserAddRequest) (
 	if originErr != nil {
 		return 0, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库操作失败")
 	}
+	//更新RBAC权限
+	dom := fmt.Sprintf("space_%d", req.SpaceID)
+	casbin.UpdateUserRoleInDomain(casbin.Casbin, req.UserID, consts.SPACEROLE_VIEWER, dom)
 	return spaceUser.ID, nil
 }
 
@@ -197,5 +206,83 @@ func (s *SpaceUserService) EditSpaceUser(req *reqSpaceUser.SpaceUserEditRequest)
 	query.Model(&entity.SpaceUser{}).Where("id = ?", req.ID).Updates(map[string]interface{}{
 		"space_role": req.SpaceRole,
 	})
+	//更新这个空间成员的权限
+	casClient := casbin.LoadCasbinMethod()
+	domain := fmt.Sprintf("space_%d", oldSpaceUser.SpaceID)
+	casbin.UpdateUserRoleInDomain(casClient, oldSpaceUser.UserID, req.SpaceRole, domain)
 	return true, nil
+}
+
+// 根据记录的Id获取空间成员记录
+func (s *SpaceUserService) GetSpaceUserById(id uint64) (*entity.SpaceUser, *ecode.ErrorWithCode) {
+	if id <= 0 {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "ID不能为空")
+	}
+	//查询空间成员记录
+	query := db.LoadDB()
+	spaceUser := &entity.SpaceUser{}
+	originErr := query.Model(&entity.SpaceUser{}).Where("id = ?", id).First(spaceUser).Error
+	if originErr != nil {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "没有找到该空间成员")
+	}
+	return spaceUser, nil
+}
+
+// 根据空间Id和用户Id获取空间成员记录
+func (s *SpaceUserService) GetSpaceUserBySpaceIdAndUserId(spaceId uint64, userId uint64) (*entity.SpaceUser, *ecode.ErrorWithCode) {
+	if spaceId <= 0 {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "ID不能为空")
+	}
+	//查询空间成员记录
+	query := db.LoadDB()
+	spaceUser := &entity.SpaceUser{}
+	originErr := query.Model(&entity.SpaceUser{}).Where("space_id = ? and user_id = ?", spaceId, userId).First(spaceUser).Error
+	if originErr != nil {
+		return nil, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "没有找到该空间成员")
+	}
+	return spaceUser, nil
+}
+
+// 获取成员的权限列表，权限有picture:edit、picture:view、picture:upload、picture:delete、spaceUser:manage
+// 若是公共图库，space请传入nil
+func GetPermissionList(space *entity.Space, loginUser *entity.User) []string {
+	permissionList := []string{}
+	if loginUser == nil {
+		return permissionList
+	}
+	adminPermission := []string{"picture:view", "picture:edit", "picture:delete", "picture:upload", "spaceUser:manage"}
+	editorPermission := []string{"picture:view", "picture:edit", "picture:delete", "picture:upload"}
+	viewerPermission := []string{"picture:view"}
+	//公共图库
+	if space == nil {
+		if loginUser.UserRole == consts.ADMIN_ROLE {
+			return adminPermission
+		}
+		return permissionList
+	}
+	switch space.SpaceType {
+	case consts.SPACE_PRIVATE:
+		//私人空间，本人或管理员有所有权限
+		if space.UserID == loginUser.ID || loginUser.UserRole == consts.ADMIN_ROLE {
+			return adminPermission
+		} else {
+			return permissionList
+		}
+	case consts.SPACE_TEAM:
+		//团队空间，查询loginUser的身份
+		spaceUserInfo, err := NewSpaceUserService().GetSpaceUserBySpaceIdAndUserId(space.ID, loginUser.ID)
+		if err != nil {
+			return permissionList
+		}
+		if spaceUserInfo != nil {
+			if spaceUserInfo.SpaceRole == consts.SPACEROLE_ADMIN {
+				return adminPermission
+			} else if spaceUserInfo.SpaceRole == consts.SPACEROLE_EDITOR {
+				return editorPermission
+			} else {
+				return viewerPermission
+			}
+		}
+	}
+	return permissionList
 }

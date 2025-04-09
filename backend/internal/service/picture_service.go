@@ -65,8 +65,21 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 			return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
 		}
 		//仅允许空间管理员上传图片
-		if space.UserID != loginUser.ID {
-			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+		switch space.SpaceType {
+		case consts.SPACE_PRIVATE:
+			//私有空间，只允许管理员上传图片
+			if space.UserID != loginUser.ID {
+				return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+			}
+		case consts.SPACE_TEAM:
+			//公共空间，只允许管理员或者编辑者上传图片
+			spaceUserInfo, err := NewSpaceUserService().GetSpaceUserBySpaceIdAndUserId(space.ID, loginUser.ID)
+			if err != nil {
+				return nil, err
+			}
+			if spaceUserInfo.SpaceRole != consts.SPACEROLE_EDITOR && spaceUserInfo.SpaceRole != consts.SPACEROLE_ADMIN {
+				return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+			}
 		}
 		//校验额度
 		if space.TotalCount >= space.MaxCount {
@@ -85,9 +98,24 @@ func (s *PictureService) UploadPicture(picFile interface{}, PictureUploadRequest
 		if oldpic == nil {
 			return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "图片不存在")
 		}
-		//权限校验，仅本人或管理员可以编辑
-		if loginUser.UserRole != consts.ADMIN_ROLE && loginUser.ID != oldpic.UserID {
-			return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "权限不足")
+		//权限校验，根据空间的不同区分权限
+		if space != nil {
+			switch space.SpaceType {
+			case consts.SPACE_PRIVATE:
+				//私有空间，只允许管理员或者空间创建者上传图片
+				if loginUser.UserRole != consts.ADMIN_ROLE && loginUser.ID != oldpic.UserID {
+					return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "权限不足")
+				}
+			case consts.SPACE_TEAM:
+				//公共空间，只允许管理员或者编辑者上传图片
+				spaceUserInfo, err := NewSpaceUserService().GetSpaceUserBySpaceIdAndUserId(space.ID, loginUser.ID)
+				if err != nil {
+					return nil, err
+				}
+				if spaceUserInfo.SpaceRole != consts.SPACEROLE_EDITOR && spaceUserInfo.SpaceRole != consts.SPACEROLE_ADMIN {
+					return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+				}
+			}
 		}
 		//校验空间是否一致
 		if space != nil && oldpic.SpaceID != PictureUploadRequest.SpaceID {
@@ -326,23 +354,24 @@ func (s *PictureService) DeletePicture(loginUser *entity.User, deleReq *common.D
 	if err != nil {
 		return err
 	}
-	//权限校验
-	if err := s.CheckPictureAuth(loginUser, oldPic); err != nil {
-		return err
-	}
-	//开启事务
-	tx := s.PictureRepo.BeginTransaction()
-	//进行删除图片操作
-	originErr := s.PictureRepo.DeleteById(tx, deleReq.Id)
-	if originErr != nil {
-		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
-	}
 	var space *entity.Space
+	var originErr error
 	if oldPic.SpaceID != 0 {
 		space, originErr = repository.NewSpaceRepository().GetSpaceById(nil, oldPic.SpaceID)
 		if originErr != nil {
 			return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 		}
+	}
+	//权限校验
+	if err := s.CheckPictureAuth(loginUser, oldPic, space); err != nil {
+		return err
+	}
+	//开启事务
+	tx := s.PictureRepo.BeginTransaction()
+	//进行删除图片操作
+	originErr = s.PictureRepo.DeleteById(tx, deleReq.Id)
+	if originErr != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
 	}
 	//修改空间的额度
 	if space != nil {
@@ -370,8 +399,9 @@ func (s *PictureService) UpdatePicture(updateReq *reqPicture.PictureUpdateReques
 	if err != nil {
 		return err
 	}
+	space, _ := NewSpaceService().GetSpaceById(oldPic.SpaceID)
 	//权限校验
-	if err := s.CheckPictureAuth(loginUser, oldPic); err != nil {
+	if err := s.CheckPictureAuth(loginUser, oldPic, space); err != nil {
 		return err
 	}
 	//校验图片参数
@@ -639,8 +669,8 @@ func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBat
 
 //增加的空间逻辑
 
-// 校验操作图片权限，公共图库仅本人或管理员可以操作，私人图库仅空间管理员可以操作
-func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entity.Picture) *ecode.ErrorWithCode {
+// 校验操作图片权限，公共图库仅本人或管理员可以操作，私人图库仅空间管理员可以操作，团队空间仅空间管理员或者编辑者可以操作
+func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entity.Picture, space *entity.Space) *ecode.ErrorWithCode {
 	//公共图库，仅本人或管理员可以操作
 	if picture.SpaceID == 0 {
 		if loginUser.ID != picture.UserID && loginUser.UserRole != consts.ADMIN_ROLE {
@@ -648,8 +678,21 @@ func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entit
 		}
 	} else {
 		//私人图库，仅空间管理员可以操作
-		if picture.UserID != loginUser.ID {
-			return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
+		switch space.SpaceType {
+		case consts.SPACE_PRIVATE:
+			//私有空间，只允许管理员上传图片
+			if space.UserID != loginUser.ID {
+				return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+			}
+		case consts.SPACE_TEAM:
+			//公共空间，只允许管理员或者编辑者上传图片
+			spaceUserInfo, err := NewSpaceUserService().GetSpaceUserBySpaceIdAndUserId(space.ID, loginUser.ID)
+			if err != nil {
+				return err
+			}
+			if spaceUserInfo.SpaceRole != consts.SPACEROLE_EDITOR && spaceUserInfo.SpaceRole != consts.SPACEROLE_ADMIN {
+				return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+			}
 		}
 	}
 	return nil
@@ -673,8 +716,9 @@ func (s *PictureService) SearchPictureByColor(loginUser *entity.User, picColor s
 	if space == nil {
 		return nil, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
 	}
-	if space.UserID != loginUser.ID {
-		return nil, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有空间权限")
+	//空间权限校验
+	if err := s.CheckPictureAuth(loginUser, nil, space); err != nil {
+		return nil, err
 	}
 	//3.查询该空间下的所有图片，必须拥有主色调
 	//构造一个查询请求，调用QueryWrapper
@@ -728,15 +772,16 @@ func (s *PictureService) PictureEditByBatch(req *reqPicture.PictureEditByBatchRe
 	if space == nil {
 		return false, ecode.GetErrWithDetail(ecode.NOT_FOUND_ERROR, "空间不存在")
 	}
-	if space.UserID != loginUser.ID {
-		return false, ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
-	}
 	//3.获取图片列表
 	var picList []entity.Picture
 	db := db.LoadDB()
 	db.Where(req.PictureIdList).Where("space_id = ?", req.SpaceID).Find(&picList)
 	if len(picList) == 0 {
 		return true, nil
+	}
+	//进一步权限校验
+	if err := s.CheckPictureAuth(loginUser, &picList[0], space); err != nil {
+		return false, err
 	}
 	//4.更新分类和标签
 	//填充名称字段
@@ -773,8 +818,9 @@ func (s *PictureService) CreatePictureOutPaintingTask(req *reqPicture.CreateOutP
 	if err != nil {
 		return nil, err
 	}
+	space, _ := repository.NewSpaceRepository().GetSpaceById(nil, pic.SpaceID)
 	//2.权限校验
-	err = s.CheckPictureAuth(loginUser, pic)
+	err = s.CheckPictureAuth(loginUser, pic, space)
 	if err != nil {
 		return nil, err
 	}

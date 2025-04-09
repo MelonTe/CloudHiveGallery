@@ -5,13 +5,13 @@ import (
 	"chg/internal/consts"
 	"chg/internal/ecode"
 	"chg/internal/service"
-
 	"github.com/gin-gonic/gin"
 )
 
 // 权限校验中间件，只有拥有权限的用户才允许执行接下来的服务
-func AuthCheck(userService *service.UserService, mustRole string) gin.HandlerFunc {
+func AuthCheck(mustRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userService := service.NewUserService()
 		//获取当前登录对象
 		loginUser, err := userService.GetLoginUser(c)
 		if err != nil {
@@ -38,8 +38,9 @@ func AuthCheck(userService *service.UserService, mustRole string) gin.HandlerFun
 }
 
 // 登录校验中间件，只有登录的用户才允许执行接下来的服务
-func LoginCheck(userService *service.UserService) gin.HandlerFunc {
+func LoginCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userService := service.NewUserService()
 		//获取当前登录对象
 		_, err := userService.GetLoginUser(c)
 		if err != nil {

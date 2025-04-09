@@ -3,11 +3,13 @@ package db
 import (
 	"chg/config"
 	"chg/internal/model/entity"
+	"chg/pkg/casbin"
 	"fmt"
+	"log"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
 )
 
 var db *gorm.DB
@@ -31,6 +33,8 @@ func init() {
 	entity.AutoMigratePicture(db)
 	entity.AutoMigrateSpace(db)
 	entity.AutoMigrateSpaceUser(db)
+	//加载RBAC权限校验模型
+	casbin.InitCasbinGorm(db)
 }
 func LoadDB() *gorm.DB {
 	return db.Session(&gorm.Session{})

@@ -14,7 +14,7 @@ export async function postSpaceAdd(body: API.SpaceAddRequest, options?: { [key: 
   })
 }
 
-/** 编辑空间 若空间不存在，则返回false POST /v1/space/edit */
+/** 编辑空间昵称 若空间不存在，则返回false POST /v1/space/edit */
 export async function postSpaceEdit(body: API.SpaceEditRequest, options?: { [key: string]: any }) {
   return request<API.Response & { data?: boolean }>('/v1/space/edit', {
     method: 'POST',
@@ -26,7 +26,7 @@ export async function postSpaceEdit(body: API.SpaceEditRequest, options?: { [key
   })
 }
 
-/** 获取当个空间的视图信息 GET /v1/space/get/vo */
+/** 获取当个空间的视图信息「登录校验」 GET /v1/space/get/vo */
 export async function getSpaceGetVo(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.getSpaceGetVoParams,

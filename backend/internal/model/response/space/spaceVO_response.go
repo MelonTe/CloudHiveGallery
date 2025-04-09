@@ -7,19 +7,20 @@ import (
 )
 
 type SpaceVO struct {
-	ID         uint64         `json:"id,string" swaggertype:"string"` // Space ID
-	SpaceName  string         `json:"spaceName"`
-	SpaceLevel int            `json:"spaceLevel"`
-	MaxSize    int64          `json:"maxSize"`
-	MaxCount   int64          `json:"maxCount"`
-	TotalSize  int64          `json:"totalSize"`
-	TotalCount int64          `json:"totalCount"`
-	UserID     uint64         `json:"userId,string" swaggertype:"string"` // User ID
-	CreateTime time.Time      `json:"createTime"`
-	EditTime   time.Time      `json:"editTime"`
-	UpdateTime time.Time      `json:"updateTime"`
-	User       resUser.UserVO `json:"user"`
-	SpaceType  int            `json:"spaceType"` // Space type: 0 - 私人空间, 1 - 团队空间
+	ID             uint64         `json:"id,string" swaggertype:"string"` // Space ID
+	SpaceName      string         `json:"spaceName"`
+	SpaceLevel     int            `json:"spaceLevel"`
+	MaxSize        int64          `json:"maxSize"`
+	MaxCount       int64          `json:"maxCount"`
+	TotalSize      int64          `json:"totalSize"`
+	TotalCount     int64          `json:"totalCount"`
+	UserID         uint64         `json:"userId,string" swaggertype:"string"` // User ID
+	CreateTime     time.Time      `json:"createTime"`
+	EditTime       time.Time      `json:"editTime"`
+	UpdateTime     time.Time      `json:"updateTime"`
+	User           resUser.UserVO `json:"user"`
+	SpaceType      int            `json:"spaceType"`      // Space type: 0 - 私人空间, 1 - 团队空间
+	PermissionList []string       `json:"permissionList"` // 空间的权限列表
 }
 
 // Convert SpaceVO to entity.Space
