@@ -9,9 +9,8 @@ import (
 	resUser "chg/internal/model/response/user"
 	"chg/internal/service"
 	"fmt"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func dumb1() {

@@ -44,6 +44,7 @@
           :imageUrl="picture?.url"
           :picture="picture"
           :spaceId="spaceId"
+          :space="space"
           :onSuccess="onSuccess"
         />
       </div>
@@ -85,7 +86,7 @@
 
 <script setup lang="ts">
 import PictureUpload from '@/components/PictureUpload.vue'
-import { computed, h, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref, watchEffect } from 'vue'
 import {FullscreenOutlined} from '@ant-design/icons-vue'
 import { getPictureGetVo, getPictureTagCategory, postPictureEdit } from '@/api/picture.ts'
 import { message } from 'ant-design-vue'
@@ -94,6 +95,7 @@ import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
 import ImageOutPainting from '@/components/ImageOutPainting.vue'
+import { getSpaceGetVo } from '@/api/space.ts'
 const picture = ref<API.PictureVO>()
 const pictureForm = reactive<API.PictureEditRequest>({})
 const router = useRouter()
@@ -212,7 +214,27 @@ const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
 onMounted(() => {
   getOldPicture()
 })
+const space = ref<API.SpaceVO>()
+
+// 获取空间信息
+const fetchSpace = async () => {
+  // 获取数据
+  if (spaceId.value) {
+    const res = await getSpaceGetVo({
+      id: spaceId.value,
+    })
+    if (res.data.code === 0 && res.data.data) {
+      space.value = res.data.data
+    }
+  }
+}
+
+watchEffect(() => {
+  fetchSpace()
+})
+
 </script>
+
 <style scoped>
 #addPicturePage {
   max-width: 720px;

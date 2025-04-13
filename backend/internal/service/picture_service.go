@@ -672,7 +672,7 @@ func (s *PictureService) UploadPictureByBatch(req *reqPicture.PictureUploadByBat
 // 校验操作图片权限，公共图库仅本人或管理员可以操作，私人图库仅空间管理员可以操作，团队空间仅空间管理员或者编辑者可以操作
 func (s *PictureService) CheckPictureAuth(loginUser *entity.User, picture *entity.Picture, space *entity.Space) *ecode.ErrorWithCode {
 	//公共图库，仅本人或管理员可以操作
-	if picture.SpaceID == 0 {
+	if picture != nil && picture.SpaceID == 0 {
 		if loginUser.ID != picture.UserID && loginUser.UserRole != consts.ADMIN_ROLE {
 			return ecode.GetErrWithDetail(ecode.NO_AUTH_ERROR, "没有权限")
 		}

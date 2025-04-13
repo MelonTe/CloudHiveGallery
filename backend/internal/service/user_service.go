@@ -126,6 +126,7 @@ func (s *UserService) UserLogin(c *gin.Context, userAccount, userPassword string
 }
 
 // 获取当前登录用户，是数据库实体，用于内部可以复用
+// 未获取到用户信息时，返回nil和错误
 func (s *UserService) GetLoginUser(c *gin.Context) (*entity.User, *ecode.ErrorWithCode) {
 	//从session中提取用户信息
 	currentUser, ok := session.GetSession(c, consts.USER_LOGIN_STATE).(entity.User)
