@@ -14,12 +14,56 @@ export async function postUserAdd(body: API.UserAddRequest, options?: { [key: st
   })
 }
 
+/** 上传用户头像「需要登录校验」 根据ID，将头像保存到数据库，返回是否成功 POST /v1/user/avatar */
+export async function postUserAvatar(body: {}, file?: File, options?: { [key: string]: any }) {
+  const formData = new FormData()
+
+  if (file) {
+    formData.append('file', file)
+  }
+
+  Object.keys(body).forEach((ele) => {
+    const item = (body as any)[ele]
+
+    if (item !== undefined && item !== null) {
+      if (typeof item === 'object' && !(item instanceof File)) {
+        if (item instanceof Array) {
+          item.forEach((f) => formData.append(ele, f || ''))
+        } else {
+          formData.append(ele, JSON.stringify(item))
+        }
+      } else {
+        formData.append(ele, item)
+      }
+    }
+  })
+
+  return request<API.Response & { data?: boolean }>('/v1/user/avatar', {
+    method: 'POST',
+    data: formData,
+    requestType: 'form',
+    ...(options || {}),
+  })
+}
+
 /** 根据ID软删除用户「管理员」 POST /v1/user/delete */
 export async function postUserOpenApiDelete(
   body: API.DeleteRequest,
   options?: { [key: string]: any }
 ) {
   return request<API.Response & { data?: boolean }>('/v1/user/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** 更新用户个人资料 若用户不存在，则返回失败 POST /v1/user/edit */
+export async function postUserEdit(body: API.UserEditRequest, options?: { [key: string]: any }) {
+  return request<API.Response & { data?: boolean }>('/v1/user/edit', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

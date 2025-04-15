@@ -4,41 +4,25 @@
       <h2>图片管理</h2>
       <a-space>
         <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
-        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
-          >+ 批量创建图片</a-button
-        >
+        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost>+ 批量创建图片</a-button>
       </a-space>
     </a-flex>
-  <div style="margin-bottom: 16px"></div>
+    <div style="margin-bottom: 16px"></div>
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="关键词" name="searchText">
-        <a-input
-          v-model:value="searchParams.searchText"
-          placeholder="从名称和简介搜索"
-          allow-clear
-        />
+        <a-input v-model:value="searchParams.searchText" placeholder="从名称和简介搜索" allow-clear />
       </a-form-item>
       <a-form-item label="类型" name="category">
         <a-input v-model:value="searchParams.category" placeholder="请输入类型" allow-clear />
       </a-form-item>
       <a-form-item label="标签" name="tags">
-        <a-select
-          v-model:value="searchParams.tags"
-          mode="tags"
-          placeholder="请输入标签"
-          style="min-width: 180px"
-          allow-clear
-        />
+        <a-select v-model:value="searchParams.tags" mode="tags" placeholder="请输入标签" style="min-width: 180px"
+          allow-clear />
       </a-form-item>
       <a-form-item label="审核状态" name="reviewStatus">
-        <a-select
-          v-model:value="searchParams.reviewStatus"
-          :options="PIC_REVIEW_STATUS_OPTIONS"
-          placeholder="请输入审核状态"
-          style="min-width: 180px"
-          allow-clear
-        />
+        <a-select v-model:value="searchParams.reviewStatus" :options="PIC_REVIEW_STATUS_OPTIONS" placeholder="请输入审核状态"
+          style="min-width: 180px" allow-clear />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
@@ -46,12 +30,7 @@
     </a-form>
     <div style="margin-bottom: 16px" />
     <!-- 表格 -->
-    <a-table
-      :columns="columns"
-      :data-source="dataList"
-      :pagination="pagination"
-      @change="doTableChange"
-    >
+    <a-table :columns="columns" :data-source="dataList" :pagination="pagination" @change="doTableChange">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'url'">
           <a-image :src="record.url" :width="120" />
@@ -84,23 +63,15 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space wrap>
-            <a-button
-              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
-              type="link"
-              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
-            >
+            <a-button v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS" type="link"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)">
               通过
             </a-button>
-            <a-button
-              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
-              type="link"
-              danger
-              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
-            >
+            <a-button v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT" type="link" danger
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)">
               拒绝
             </a-button>
-            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank"
-              >编辑
+            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">编辑
             </a-button>
             <a-button type="link" danger @click="doDelete(record.id)">删除</a-button>
           </a-space>
@@ -268,3 +239,44 @@ const handleReview = async (record: API.Picture, reviewStatus: number) => {
   }
 }
 </script>
+
+<style scoped>
+:deep(.ant-btn-primary) {
+  background-color: #64d487;
+  border-color: #64d487;
+  color: #fff;
+}
+
+:deep(.ant-btn-primary:hover),
+:deep(.ant-btn-primary:focus) {
+  background-color: #4bc072;
+  border-color: #4bc072;
+  color: #fff;
+}
+
+:deep(.ant-btn-default) {
+  border-color: #64d487;
+  color: #64d487;
+}
+
+:deep(.ant-btn-default:hover),
+:deep(.ant-btn-default:focus) {
+  border-color: #4bc072;
+  color: #4bc072;
+}
+
+:deep(.ant-btn-link) {
+  color: #64d487;
+}
+
+:deep(.ant-btn-link:hover),
+:deep(.ant-btn-link:focus) {
+  color: #4bc072;
+}
+
+:deep(.ant-btn-link.ant-btn-dangerous),
+:deep(.ant-btn-link.ant-btn-dangerous:hover),
+:deep(.ant-btn-link.ant-btn-dangerous:focus) {
+  color: #ff4d4f;
+}
+</style>

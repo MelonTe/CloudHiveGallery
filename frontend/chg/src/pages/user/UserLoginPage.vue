@@ -67,28 +67,96 @@ const handleSubmit = async (values: any) => {
 
 <style scoped>
 #userLoginPage {
+    width: 100%;
     max-width: 360px;
-    /* 宽度 */
     margin: 0 auto;
-    margin-top: 10%;
-    /* 居中 */
+    margin-top: 8%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#userLoginPage :deep(.ant-input-affix-wrapper) {
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    background: transparent;
+    height: 40px;
+    transition: all 0.3s;
+}
+
+#userLoginPage :deep(.ant-input-affix-wrapper:hover) {
+    border-color: #4CAF50;
+}
+
+#userLoginPage :deep(.ant-input-affix-wrapper-focused) {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+#userLoginPage :deep(.ant-input) {
+    background: transparent;
+    border: none;
+    height: 38px;
+}
+
+#userLoginPage :deep(.ant-input:focus) {
+    box-shadow: none;
+}
+
+#userLoginPage :deep(.ant-input-password) {
+    background: transparent;
+    border: none;
+}
+
+#userLoginPage :deep(.ant-input-password .ant-input) {
+    background: transparent;
+    border: none;
+    height: 38px;
+}
+
+#userLoginPage :deep(.ant-input-password .ant-input-suffix) {
+    background: transparent;
+}
+
+#userLoginPage :deep(.ant-input-password .ant-input-suffix .anticon) {
+    color: #4CAF50;
+    font-size: 16px;
 }
 
 .title {
     text-align: center;
     margin-bottom: 16px;
+    font-size: 24px;
+    background: linear-gradient(45deg, #43b16a, #64d487);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .desc {
     text-align: center;
-    color: #bbb;
-    margin-bottom: 16px;
+    color: #888;
+    margin-bottom: 24px;
 }
 
 .tips {
-    color: #bbb;
+    color: #888;
     text-align: right;
     font-size: 13px;
     margin-bottom: 16px;
+}
+
+:deep(.ant-btn-primary) {
+    height: 44px;
+    background: linear-gradient(135deg, #64d487, #43b16a);
+    border: none;
+    box-shadow: 0 4px 8px rgba(100, 212, 135, 0.2);
+    transition: all 0.3s;
+}
+
+:deep(.ant-btn-primary:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(100, 212, 135, 0.25);
+    background: linear-gradient(135deg, #5bc77b, #3ba05f);
 }
 </style>

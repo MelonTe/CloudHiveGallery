@@ -15,6 +15,8 @@ import SearchPicturePage from '@/pages/SearchPicturePage.vue'
 import SpaceUsageAnalyze from '@/components/analyze/SpaceUsageAnalyze.vue'
 import SpaceAnalyzePage from '@/pages/SpaceAnalyzePage.vue'
 import SpaceUserManagePage from '@/pages/admin/SpaceUserManagePage.vue'
+import ProfilePage from '@/pages/ProfilePage.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -103,6 +105,11 @@ const router = createRouter({
       name: '空间成员管理',
       component: SpaceUserManagePage,
       props: true,
+    },
+    {
+      path: '/profile',
+      name: '个人主页',
+      component: ProfilePage,
     },
   ],
 })

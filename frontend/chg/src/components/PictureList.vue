@@ -1,11 +1,8 @@
 <template>
   <div class="picture-list">
     <!-- 图片列表 -->
-    <a-list
-      :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }"
-      :data-source="dataList"
-      :loading="loading"
-    >
+    <a-list :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }" :data-source="dataList"
+      :loading="loading">
       <template #renderItem="{ item: picture }">
         <a-list-item style="padding: 0">
           <!-- 单张图片 -->
@@ -13,11 +10,7 @@
             <!-- 图片封面 -->
             <template #cover>
               <div class="cover-container">
-                <img
-                  :alt="picture.name"
-                  :src="picture.thumbnailUrl || picture.url"
-                  class="cover-image"
-                />
+                <img :alt="picture.name" :src="picture.thumbnailUrl || picture.url" class="cover-image" />
               </div>
             </template>
 
@@ -40,10 +33,10 @@
                 <search-outlined />
               </a-space>
               <a-space v-if="canEdit" class="card-actions" @click="(e) => doEdit(picture, e)">
-                <edit-outlined  />
+                <edit-outlined />
               </a-space>
               <a-space v-if="canDelete" class="card-actions" @click="(e) => doDelete(picture, e)">
-                <delete-outlined  />
+                <delete-outlined />
               </a-space>
             </template>
           </a-card>
@@ -56,7 +49,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import {ref} from 'vue'
+import { ref } from 'vue'
 import {
   DeleteOutlined,
   EditOutlined,
@@ -158,6 +151,8 @@ const doShare = (picture: API.PictureVO, e: Event) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin: 0 auto;
+  /* 使卡片居中 */
 }
 
 /* 鼠标悬停时的效果 */
@@ -169,7 +164,8 @@ const doShare = (picture: API.PictureVO, e: Event) => {
 /* 覆盖容器（图片区域） */
 .cover-container {
   width: 100%;
-  height: 160px; /* ⬆️ 增加高度，让图片占比更多 */
+  height: 160px;
+  /* ⬆️ 增加高度，让图片占比更多 */
   overflow: hidden;
   border-radius: 10px 10px 0 0;
   display: flex;
@@ -192,9 +188,11 @@ const doShare = (picture: API.PictureVO, e: Event) => {
 /* 操作按钮 */
 .card-actions {
   display: flex;
-  justify-content: center; /* 居中 */
+  justify-content: center;
+  /* 居中 */
   align-items: center;
-  gap: 16px; /* 按钮之间的间距 */
+  gap: 16px;
+  /* 按钮之间的间距 */
   padding: 6px 0;
   font-size: 14px;
   color: #333;
@@ -204,5 +202,29 @@ const doShare = (picture: API.PictureVO, e: Event) => {
 
 .card-actions:hover {
   color: #1890ff;
+}
+
+/* 确保列表布局正确 */
+.picture-list :deep(.ant-list-items) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0 -8px;
+}
+
+.picture-list :deep(.ant-list-item) {
+  padding: 8px !important;
+  margin-bottom: 16px;
+}
+
+/* 响应式处理 */
+@media (max-width: 576px) {
+  .custom-card {
+    max-width: 100%;
+  }
+
+  .picture-list :deep(.ant-list-item) {
+    width: 100%;
+  }
 }
 </style>

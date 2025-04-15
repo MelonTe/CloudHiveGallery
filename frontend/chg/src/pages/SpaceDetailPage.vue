@@ -15,21 +15,21 @@
         </a-button>
         <a-button
           v-if="canManageSpaceUser"
-          type="primary"
-          ghost
+          type="default"
           :icon="h(TeamOutlined)"
           :href="`/spaceUserManage/${id}`"
           target="_blank"
+          class="custom-button"
         >
           成员管理
         </a-button>
         <a-button
           v-if="canManageSpaceUser"
-          type="primary"
-          ghost
+          type="default"
           :icon="h(BarChartOutlined)"
           :href="`/space_analyze?spaceId=${id}`"
           target="_blank"
+          class="custom-button"
         >
           空间分析
         </a-button>
@@ -218,5 +218,18 @@ watch(
 <style scoped>
 #pictureDetailPage {
   margin-bottom: 16px;
+}
+
+.custom-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
+  transition: all 0.3s;
+}
+
+.custom-button:hover {
+  background: rgba(100, 212, 135, 0.1);
+  border-color: rgba(100, 212, 135, 0.3);
+  color: #64d487;
 }
 </style>

@@ -19,22 +19,12 @@
         <a-input v-model:value="searchParams.spaceName" placeholder="请输入空间名称" allow-clear />
       </a-form-item>
       <a-form-item label="空间级别" name="spaceLevel">
-        <a-select
-          v-model:value="searchParams.spaceLevel"
-          :options="SPACE_LEVEL_OPTIONS"
-          placeholder="请输入空间级别"
-          style="min-width: 180px"
-          allow-clear
-        />
+        <a-select v-model:value="searchParams.spaceLevel" :options="SPACE_LEVEL_OPTIONS" placeholder="请输入空间级别"
+          style="min-width: 180px" allow-clear />
       </a-form-item>
       <a-form-item label="空间类别" name="spaceType">
-        <a-select
-          v-model:value="searchParams.spaceType"
-          :options="SPACE_TYPE_OPTIONS"
-          placeholder="请输入空间类别"
-          style="min-width: 180px"
-          allow-clear
-        />
+        <a-select v-model:value="searchParams.spaceType" :options="SPACE_TYPE_OPTIONS" placeholder="请输入空间类别"
+          style="min-width: 180px" allow-clear />
       </a-form-item>
       <a-form-item label="用户 id" name="userId">
         <a-input v-model:value="searchParams.userId" placeholder="请输入用户 id" allow-clear />
@@ -45,12 +35,7 @@
     </a-form>
     <div style="margin-bottom: 16px" />
     <!-- 表格 -->
-    <a-table
-      :columns="columns"
-      :data-source="dataList"
-      :pagination="pagination"
-      @change="doTableChange"
-    >
+    <a-table :columns="columns" :data-source="dataList" :pagination="pagination" @change="doTableChange">
       <template #bodyCell="{ column, record }">
         <!-- 空间级别 -->
         <template v-if="column.dataIndex === 'spaceLevel'">
@@ -89,7 +74,7 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs'
 import { SPACE_TYPE_MAP, SPACE_TYPE_OPTIONS } from '@/constants/space.ts'
-import {formatSize} from '@/utils'
+import { formatSize } from '@/utils'
 import { message } from 'ant-design-vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { postSpaceListPage } from '@/api/space.ts'
@@ -191,3 +176,44 @@ const doTableChange = (page: any) => {
 }
 
 </script>
+
+<style scoped>
+:deep(.ant-btn-primary) {
+  background-color: #64d487;
+  border-color: #64d487;
+  color: #fff;
+}
+
+:deep(.ant-btn-primary:hover),
+:deep(.ant-btn-primary:focus) {
+  background-color: #4bc072;
+  border-color: #4bc072;
+  color: #fff;
+}
+
+:deep(.ant-btn-default) {
+  border-color: #64d487;
+  color: #64d487;
+}
+
+:deep(.ant-btn-default:hover),
+:deep(.ant-btn-default:focus) {
+  border-color: #4bc072;
+  color: #4bc072;
+}
+
+:deep(.ant-btn-link) {
+  color: #64d487;
+}
+
+:deep(.ant-btn-link:hover),
+:deep(.ant-btn-link:focus) {
+  color: #4bc072;
+}
+
+:deep(.ant-btn-link.ant-btn-dangerous),
+:deep(.ant-btn-link.ant-btn-dangerous:hover),
+:deep(.ant-btn-link.ant-btn-dangerous:focus) {
+  color: #ff4d4f;
+}
+</style>

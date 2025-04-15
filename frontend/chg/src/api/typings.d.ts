@@ -258,7 +258,7 @@ declare namespace API {
     /** 审核信息 */
     reviewMessage?: string
     /** 审核状态 */
-    reviewStatus?: string
+    reviewStatus?: number
   }
 
   type PictureSearchByColorRequest = {
@@ -647,6 +647,15 @@ declare namespace API {
     userProfile?: string
     /** 用户权限 */
     userRole?: string
+  }
+
+  type UserEditRequest = {
+    /** 用户ID */
+    id?: string
+    /** 用户昵称 */
+    userName?: string
+    /** 用户简介 */
+    userProfile?: string
   }
 
   type UserLoginRequest = {

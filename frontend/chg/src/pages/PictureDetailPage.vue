@@ -50,14 +50,11 @@
             <a-descriptions-item label="主色调">
               <a-space>
                 {{ picture.picColor ?? '-' }}
-                <div
-                  v-if="picture.picColor"
-                  :style="{
-                    backgroundColor: toHexColor(picture.picColor),
-                    width: '16px',
-                    height: '16px',
-                  }"
-                />
+                <div v-if="picture.picColor" :style="{
+                  backgroundColor: toHexColor(picture.picColor),
+                  width: '16px',
+                  height: '16px',
+                }" />
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
@@ -190,5 +187,47 @@ const doShare = () => {
 <style scoped>
 #pictureDetailPage {
   margin-bottom: 16px;
+}
+
+:deep(.ant-btn-primary) {
+  background-color: #64d487;
+  border-color: #64d487;
+  color: #fff;
+}
+
+:deep(.ant-btn-primary:hover),
+:deep(.ant-btn-primary:focus) {
+  background-color: #4bc072;
+  border-color: #4bc072;
+  color: #fff;
+}
+
+:deep(.ant-btn-primary[disabled]),
+:deep(.ant-btn-primary[disabled]:hover),
+:deep(.ant-btn-primary[disabled]:focus),
+:deep(.ant-btn-primary[disabled]:active) {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+:deep(.ant-btn-link) {
+  color: #64d487;
+}
+
+:deep(.ant-btn-link:hover),
+:deep(.ant-btn-link:focus) {
+  color: #4bc072;
+}
+
+:deep(.ant-btn-default) {
+  border-color: #64d487;
+  color: #64d487;
+}
+
+:deep(.ant-btn-default:hover),
+:deep(.ant-btn-default:focus) {
+  border-color: #4bc072;
+  color: #4bc072;
 }
 </style>
