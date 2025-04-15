@@ -26,6 +26,8 @@ func RegisterV1Routes(r *gin.Engine) {
 			userAPI.POST("/delete", middleware.AuthCheck(consts.ADMIN_ROLE), controller.DeleteUser)
 			userAPI.POST("/add", middleware.AuthCheck(consts.ADMIN_ROLE), controller.AddUser)
 			userAPI.GET("/get", middleware.AuthCheck(consts.ADMIN_ROLE), controller.GetUserById)
+			userAPI.POST("/avatar", middleware.LoginCheck(), controller.UploadAvatar)
+			userAPI.POST("/edit", middleware.LoginCheck(), controller.EditUser)
 		}
 		fileAPI := apiV1.Group("/file")
 		{

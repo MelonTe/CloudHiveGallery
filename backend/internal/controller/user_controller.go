@@ -263,3 +263,58 @@ func ListUserVOByPage(c *gin.Context) {
 	}
 	common.Success(c, *users)
 }
+
+// UploadAvatar godoc
+// @Summary      上传用户头像「需要登录校验」
+// @Description  根据ID，将头像保存到数据库，返回是否成功
+// @Tags         user
+// @Accept       mpfd
+// @Produce      json
+// @Param        file formData file true "图片"
+// @Success      200  {object}  common.Response{data=bool} "上传成功，返回图片信息视图"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/user/avatar [POST]
+func UploadAvatar(c *gin.Context) {
+	file, _ := c.FormFile("file")
+	loginUser, err := sUser.GetLoginUser(c)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	suc, err := sUser.UploadAvatar(file, loginUser.ID)
+	if err != nil {
+		common.BaseResponse(c, nil, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, suc)
+}
+
+// EditUser godoc
+// @Summary      更新用户个人资料
+// @Description  若用户不存在，则返回失败
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param		request body reqUser.UserEditRequest true "需要更新的用户信息"
+// @Success      200  {object}  common.Response{data=bool} "更新成功"
+// @Failure      400  {object}  common.Response "更新失败，详情见响应中的code"
+// @Router       /v1/user/edit [POST]
+func EditUser(c *gin.Context) {
+	updateReq := reqUser.UserEditRequest{}
+	c.ShouldBind(&updateReq)
+	if updateReq.ID <= 0 {
+		common.BaseResponse(c, false, "参数错误", ecode.PARAMS_ERROR)
+		return
+	}
+	//校验是否是本人更新
+	loginUesr, _ := sUser.GetLoginUser(c)
+	if loginUesr.ID != updateReq.ID {
+		common.BaseResponse(c, false, "没有权限", ecode.NO_AUTH_ERROR)
+		return
+	}
+	if err := sUser.UpdateUserByMap(&updateReq); err != nil {
+		common.BaseResponse(c, false, err.Msg, err.Code)
+		return
+	}
+	common.Success(c, true)
+}

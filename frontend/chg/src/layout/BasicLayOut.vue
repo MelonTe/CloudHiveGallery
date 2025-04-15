@@ -11,7 +11,7 @@
             </a-layout-content>
           </a-layout>
           <a-layout-footer class="footer">
-                CloudHiveGallery made By：MelonTe
+                云巢画廊 made By：MelonTe.粤ICP备2024329874号-2
             </a-layout-footer>
         </a-layout>
     </div>

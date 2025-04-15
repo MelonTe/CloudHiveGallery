@@ -113,6 +113,20 @@ func (r *UserRepository) UpdateUser(tx *gorm.DB, user *entity.User) (bool, error
 	}
 	return true, nil
 }
+func (r *UserRepository) UpdateUserByMap(tx *gorm.DB, id uint64, updateMap map[string]interface{}) (bool, error) {
+	if tx == nil {
+		tx = r.db
+	}
+	result := tx.Model(&entity.User{}).Where("id = ?", id).Updates(updateMap)
+	err := result.Error
+	if err != nil {
+		return false, err
+	}
+	if result.RowsAffected == 0 {
+		return false, nil
+	}
+	return true, nil
+}
 
 func (r *UserRepository) ListUserByPage(tx *gorm.DB, query *gorm.DB) ([]entity.User, error) {
 	if tx == nil {

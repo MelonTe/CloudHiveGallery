@@ -2038,6 +2038,56 @@
                 }
             }
         },
+        "/v1/user/avatar": {
+            "post": {
+                "description": "根据ID，将头像保存到数据库，返回是否成功",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "上传用户头像「需要登录校验」",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "图片",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "上传成功，返回图片信息视图",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/delete": {
             "post": {
                 "consumes": [
@@ -2082,6 +2132,58 @@
                     },
                     "400": {
                         "description": "删除失败，详情见响应中的code",
+                        "schema": {
+                            "$ref": "#/definitions/common.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/edit": {
+            "post": {
+                "description": "若用户不存在，则返回失败",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "更新用户个人资料",
+                "parameters": [
+                    {
+                        "description": "需要更新的用户信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserEditRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "更新失败，详情见响应中的code",
                         "schema": {
                             "$ref": "#/definitions/common.Response"
                         }
@@ -3238,8 +3340,7 @@
                 },
                 "reviewStatus": {
                     "description": "审核状态",
-                    "type": "string",
-                    "example": ""
+                    "type": "integer"
                 }
             }
         },
@@ -3890,6 +3991,24 @@
                 },
                 "userRole": {
                     "description": "用户权限",
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserEditRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": ""
+                },
+                "userName": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "userProfile": {
+                    "description": "用户简介",
                     "type": "string"
                 }
             }

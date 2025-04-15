@@ -4,6 +4,7 @@ import (
 	"chg/internal/common"
 	"chg/internal/consts"
 	"chg/internal/ecode"
+	"chg/internal/manager"
 	"chg/internal/model/entity"
 	reqUser "chg/internal/model/request/user"
 	resUser "chg/internal/model/response/user"
@@ -12,6 +13,8 @@ import (
 	"chg/pkg/casbin"
 	"chg/pkg/db"
 	"chg/pkg/session"
+	"fmt"
+	"mime/multipart"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -225,6 +228,22 @@ func (s *UserService) UpdateUser(u *entity.User) *ecode.ErrorWithCode {
 	}
 }
 
+// 更新用户信息的特定字段，不存在则返回错误
+func (s *UserService) UpdateUserByMap(req *reqUser.UserEditRequest) *ecode.ErrorWithCode {
+	updateMap := map[string]interface{}{
+		"user_name":    req.UserName,
+		"user_profile": req.UserProfile,
+	}
+	if suc, err := s.UserRepo.UpdateUserByMap(nil, req.ID, updateMap); err != nil {
+		return ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库错误")
+	} else {
+		if !suc {
+			return ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "用户不存在")
+		}
+		return nil
+	}
+}
+
 // 获取用户列表
 func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUser.ListUserVOResponse, *ecode.ErrorWithCode) {
 	query, err := s.GetQueryWrapper(db.LoadDB(), queryReq)
@@ -254,4 +273,39 @@ func (s *UserService) ListUserByPage(queryReq *reqUser.UserQueryRequest) (*resUs
 			Current: queryReq.Current,
 		},
 	}, nil
+}
+
+// 上传头像接口
+func (s *UserService) UploadAvatar(file *multipart.FileHeader, userId uint64) (bool, *ecode.ErrorWithCode) {
+	//1.校验
+	if file == nil {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件为空")
+	}
+	if file.Size > 5*1024*1024 {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件过大")
+	}
+	if !strings.HasPrefix(file.Header.Get("Content-Type"), "image/") {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件格式错误")
+	}
+	//校验文件大小
+	fileSize := file.Size
+	ONE_MB := int64(1024 * 1024)
+	if fileSize > 5*ONE_MB {
+		return false, ecode.GetErrWithDetail(ecode.PARAMS_ERROR, "文件过大，不能超过2MB")
+	}
+	//2.获取文件路径
+	//定义前缀
+	uploadPrefix := fmt.Sprintf("avatar/%d", userId)
+	result, err := manager.UploadPicture(file, uploadPrefix)
+	if err != nil {
+		return false, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "文件上传失败")
+	}
+	//3.更新数据库
+	updateMap := map[string]interface{}{"user_avatar": fmt.Sprintf("%s", result.URL)}
+	query := db.LoadDB()
+	query.Model(&entity.User{}).Where("id = ?", userId).Updates(updateMap)
+	if err := query.Error; err != nil {
+		return false, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, "数据库更新失败")
+	}
+	return true, nil
 }

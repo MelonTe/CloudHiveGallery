@@ -533,8 +533,7 @@ definitions:
         type: string
       reviewStatus:
         description: 审核状态
-        example: ""
-        type: string
+        type: integer
     type: object
   picture.PictureSearchByColorRequest:
     properties:
@@ -991,6 +990,19 @@ definitions:
         type: string
     required:
     - userAccount
+    type: object
+  user.UserEditRequest:
+    properties:
+      id:
+        description: 用户ID
+        example: ""
+        type: string
+      userName:
+        description: 用户昵称
+        type: string
+      userProfile:
+        description: 用户简介
+        type: string
     type: object
   user.UserLoginRequest:
     properties:
@@ -2318,6 +2330,36 @@ paths:
       summary: 创建一个用户「管理员」
       tags:
       - user
+  /v1/user/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 根据ID，将头像保存到数据库，返回是否成功
+      parameters:
+      - description: 图片
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功，返回图片信息视图
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 上传用户头像「需要登录校验」
+      tags:
+      - user
   /v1/user/delete:
     post:
       consumes:
@@ -2346,6 +2388,37 @@ paths:
           schema:
             $ref: '#/definitions/common.Response'
       summary: 根据ID软删除用户「管理员」
+      tags:
+      - user
+  /v1/user/edit:
+    post:
+      consumes:
+      - application/json
+      description: 若用户不存在，则返回失败
+      parameters:
+      - description: 需要更新的用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserEditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+        "400":
+          description: 更新失败，详情见响应中的code
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 更新用户个人资料
       tags:
       - user
   /v1/user/get:
