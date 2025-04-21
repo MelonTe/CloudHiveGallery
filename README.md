@@ -10,7 +10,7 @@
 </h1>
 ## 1、项目介绍
 
-云巢画廊是一款基于 Gin、Redis、MySQL、COS、WebSocket 及 AI 技术打造的在线图库系统。平台支持多种图片导入方式（本地上传、URL 引入）、以图搜图、颜色筛选、AI 智能扩图、图片一键分享，并在团队空间内实现多人实时协同编辑。系统已稳定上线，访问地址：[https://www.cloudhivegallery.cloud](https://www.cloudhivegallery.cloud/)
+云巢画廊是一款基于 Gin、Redis、MySQL、COS、WebSocket 及 AI 技术打造的在线图库系统。平台支持多种图片导入方式（本地上传、URL 引入）、以图搜图、颜色筛选、AI 智能扩图、图片一键分享，并在团队空间内实现多人实时协同编辑。系统已稳定上线，访问地址：[https://www.cloudhivegallery.cloud](http://www.cloudhivegallery.cloud/)
 
 **核心功能快速跳转**：
 
