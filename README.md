@@ -238,7 +238,8 @@ aliYunAi:
 
 这里录制了一段视频进行演示：
 
-<video src="README.assets/屏幕录制 2025-04-21 135429.mp4"></video>
+
+https://github.com/user-attachments/assets/874a3edc-c88c-4d36-8293-a8b362da4487
 
 ### 3.4、管理员
 
