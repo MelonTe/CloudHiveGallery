@@ -83,6 +83,6 @@ func RegisterV1Routes(r *gin.Engine) {
 			spaceUserAPI.POST("/edit", middleware.CasbinAuthCheck(consts.DOM_SPACE, consts.OBJ_SPACEUSER, consts.ACT_SPACEUSER_MANAGE), controller.EditSpaceUser)
 			spaceUserAPI.POST("/list/my", controller.ListMyTeamSpace)
 		}
-		apiV1.GET("/ws/picture/edit", websocket.PictureEditHandShake)
+		r.GET("/ws/picture/edit", websocket.PictureEditHandShake)
 	}
 }

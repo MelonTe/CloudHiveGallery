@@ -80,6 +80,12 @@ const handleSubmit = async (values: any) => {
   if (res.data.code === 0 && res.data.data) {
     message.success('操作成功')
     let path = `/space/${spaceId ?? res.data.data}`
+    // 如果是创建团队空间成功，刷新页面
+    if (!spaceId && spaceType.value === SPACE_TYPE_ENUM.TEAM) {
+      setTimeout(() => {
+        window.location.reload()
+      }, 800)
+    }
     router.push({
       path,
     })

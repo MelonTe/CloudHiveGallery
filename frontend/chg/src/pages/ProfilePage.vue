@@ -135,6 +135,9 @@ const handleAvatarUpload = async ({ file }: any) => {
         ...loginUserStore.loginUser,
         userAvatar: response.data,
       })
+      setTimeout(() => {
+        window.location.reload()
+      }, 800)
     } else {
       message.error('头像上传失败：' + response.msg)
     }

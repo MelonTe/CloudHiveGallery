@@ -39,6 +39,7 @@ func init() {
 	// 用于 Get Service 查询，默认全地域 service.cos.myqcloud.com
 	su, _ := url.Parse(fmt.Sprintf("https://cos.%s.myqcloud.com", c.Tcos.Region))
 	b := &cos.BaseURL{BucketURL: u, ServiceURL: su}
+	log.Println("密钥显示：", os.Getenv("SECRETID"))
 	// 1.永久密钥
 	client := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{

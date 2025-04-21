@@ -5,11 +5,9 @@ import (
 	"chg/internal/model/entity"
 	"chg/pkg/casbin"
 	"fmt"
-	"log"
-
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"log"
 )
 
 var db *gorm.DB
@@ -24,7 +22,7 @@ func init() {
 		config.Database.Name)
 	var err error
 	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info), // 设置日志级别为 Info
+		//Logger: logger.Default.LogMode(logger.Info), // 设置日志级别为 Info
 	}); err != nil {
 		log.Fatalf("Failed to connect DB, %s", err)
 	}

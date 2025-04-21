@@ -6,7 +6,7 @@ import (
 
 // 性能测试函数
 func BenchmarkArgon2Hash(b *testing.B) {
-	password := "execmt111"
+	password := "eee123"
 	salt := "exec"
 	// 重置计时器，避免生成盐值的时间影响测试结果
 	b.ResetTimer()

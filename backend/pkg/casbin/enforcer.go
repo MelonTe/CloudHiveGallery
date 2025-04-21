@@ -4,13 +4,25 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"gorm.io/gorm"
-	"os"
+	_ "os"
 	"strings"
+
+	// 引入 embed 包（必须导入）
+	_ "embed"
 )
 
-// 定义一个结构体，包含Enforcer和Adapter
+// 将模型和策略文件嵌入到变量中
+//
+//go:embed rbac_model.conf
+var embeddedRBACModelConf string
+
+//go:embed rbac_policy.csv
+var embeddedRBACPolicyCsv string
+
+// 定义一个结构体，包含 Enforcer 和 Adapter
 type CasbinMethod struct {
 	Enforcer *casbin.Enforcer
 	Adapter  *gormadapter.Adapter
@@ -22,20 +34,25 @@ func LoadCasbinMethod() *CasbinMethod {
 	return Casbin
 }
 
-// InitCasbinGorm 初始化Casbin Gorm适配器
+// InitCasbinGorm 初始化 Casbin Gorm适配器，并从嵌入的文件加载模型和策略
 func InitCasbinGorm(db *gorm.DB) (*CasbinMethod, error) {
-	//创建 Gorm适配器
+	// 创建 Gorm 适配器
 	a, err := gormadapter.NewAdapterByDB(db)
 	if err != nil {
 		return nil, err
 	}
-	// 创建 Casbin Enforcer , 指定自定义的model文件
-	enforcer, err := casbin.NewEnforcer("./pkg/casbin/rbac_model.conf", a)
+	// 通过嵌入的模型字符串创建 Casbin 模型
+	m, err := model.NewModelFromString(embeddedRBACModelConf)
 	if err != nil {
 		return nil, err
 	}
-	// 初始化策略，导入csv文件
-	if err := loadCsvPolicy(enforcer, "./pkg/casbin/rbac_policy.csv"); err != nil {
+	// 初始化 Enforcer，使用模型和适配器
+	enforcer, err := casbin.NewEnforcer(m, a)
+	if err != nil {
+		return nil, err
+	}
+	// 从嵌入的策略 CSV 字符串加载策略
+	if err := loadCsvPolicy(enforcer, embeddedRBACPolicyCsv); err != nil {
 		return nil, err
 	}
 	Casbin = &CasbinMethod{
@@ -45,22 +62,14 @@ func InitCasbinGorm(db *gorm.DB) (*CasbinMethod, error) {
 	return Casbin, nil
 }
 
-// 从csv导入策略
-func loadCsvPolicy(e *casbin.Enforcer, path string) error {
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
+// loadCsvPolicy 从 CSV 字符串加载策略
+func loadCsvPolicy(e *casbin.Enforcer, csvContent string) error {
+	scanner := bufio.NewScanner(strings.NewReader(csvContent))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-
 		parts := strings.Split(line, ",")
 		for i := range parts {
 			parts[i] = strings.TrimSpace(parts[i])
@@ -68,15 +77,20 @@ func loadCsvPolicy(e *casbin.Enforcer, path string) error {
 
 		switch parts[0] {
 		case "p":
+			// 这里假设 p 策略格式为：p, sub, obj, act
+			if len(parts) < 4 {
+				continue
+			}
 			_, _ = e.AddPolicy(parts[1], parts[2], parts[3])
 		case "g":
+			// 如果存在分组策略格式为：g, sub, obj, dom
 			if len(parts) == 4 {
 				_, _ = e.AddGroupingPolicy(parts[1], parts[2], parts[3])
 			}
 		}
 	}
 	e.BuildRoleLinks()
-	// 保存到数据库
+	// 将策略保存到数据库
 	return e.SavePolicy()
 }
 

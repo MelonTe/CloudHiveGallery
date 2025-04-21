@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
+    "pure-build" : "vite build",
     "openapi": "node openapi.config.js",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",

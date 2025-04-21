@@ -14,7 +14,7 @@
           + 创建图片
         </a-button>
         <a-button
-          v-if="canManageSpaceUser"
+          v-if="canManageSpaceUser && space.spaceType !== 0"
           type="default"
           :icon="h(TeamOutlined)"
           :href="`/spaceUserManage/${id}`"

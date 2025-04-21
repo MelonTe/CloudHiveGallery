@@ -1,10 +1,14 @@
 package config
 
 import (
-	"log"
-
+	"bytes"
+	_ "embed"
 	"github.com/spf13/viper"
+	"log"
 )
+
+//go:embed config.yaml
+var configFile []byte
 
 // Config 用来存储所有的配置信息
 type Config struct {
@@ -33,13 +37,10 @@ type Config struct {
 var config *Config
 
 func init() {
-	//初始化config
-	viper.AddConfigPath("./config")    //在当前文件夹下寻找
-	viper.SetConfigName("config.yaml") //查找指定文件名
-	viper.SetConfigType("yaml")        //当没有设置特定的文件后缀名时，必须要指定文件类型
+	viper.SetConfigType("yaml") // 设置配置文件类型为 yaml
 
-	//读取配置文件
-	if err := viper.ReadInConfig(); err != nil {
+	// 使用嵌入的 configFile 加载配置
+	if err := viper.ReadConfig(bytes.NewBuffer(configFile)); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 

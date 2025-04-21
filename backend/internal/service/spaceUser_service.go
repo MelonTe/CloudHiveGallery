@@ -258,7 +258,8 @@ func GetPermissionList(space *entity.Space, loginUser *entity.User) []string {
 		if loginUser.UserRole == consts.ADMIN_ROLE {
 			return adminPermission
 		}
-		return permissionList
+		//默认都拥有只读权限
+		return viewerPermission
 	}
 	switch space.SpaceType {
 	case consts.SPACE_PRIVATE:
