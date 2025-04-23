@@ -20,9 +20,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"gorm.io/gorm"
+	"golang.org/x/sync/singleflight"
 	"log"
 	"math/rand/v2"
 	"mime/multipart"
@@ -32,7 +32,12 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/PuerkitoBio/goquery"
+	"gorm.io/gorm"
 )
+
+var listGroup singleflight.Group
 
 type PictureService struct {
 	PictureRepo *repository.PictureRepository
@@ -522,11 +527,16 @@ func (s *PictureService) ListPictureVOByPageWithCache(req *reqPicture.PictureQue
 	}
 
 	//缓存未击中，正常流程，并将结果放入缓存
-
-	data, Eerr := s.ListPictureVOByPage(req)
-	if Eerr != nil {
-		return nil, Eerr
+	v, err, _ := listGroup.Do(cacheKey, func() (interface{}, error) {
+		data, businessErr := s.ListPictureVOByPage(req)
+		return data, errors.New(businessErr.Msg)
+	})
+	if err != nil {
+		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, err.Error())
 	}
+	//拿到真正的数据
+	data := v.(*resPicture.ListPictureVOResponse)
+
 	//数据序列化，加入缓存中，允许存储空值
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
@@ -537,11 +547,16 @@ func (s *PictureService) ListPictureVOByPageWithCache(req *reqPicture.PictureQue
 	//设置过期时间，为5分钟~10分钟
 	expireTime := time.Duration(rand.IntN(300)+300) * time.Second
 	expireTime2 := time.Duration(rand.IntN(200)+300) * time.Second
-	_, err = redisClient.Set(context.Background(), cacheKey, dataBytes, expireTime).Result()
-	if err != nil {
-		log.Println("设置缓存失败，错误为", err)
-	}
-	localCache.SetWithTTL(cacheKey, dataBytes, 1, expireTime2)
+	go func() {
+		// Redis
+		if _, err := rds.GetRedisClient().
+			Set(context.Background(), cacheKey, dataBytes, expireTime).
+			Result(); err != nil {
+			log.Println("写 Redis 缓存失败：", err)
+		}
+		// 本地
+		cache.GetCache().SetWithTTL(cacheKey, data, 1, expireTime2)
+	}()
 	//返回数据
 	return data, nil
 }
