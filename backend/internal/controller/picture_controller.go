@@ -353,9 +353,20 @@ func ListPictureVOByPageWithCache(c *gin.Context) {
 			common.BaseResponse(c, nil, err.Msg, err.Code)
 			return
 		}
-		if space.UserID != loginUser.ID {
-			common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
-			return
+		//区分私有空间和团队空间
+		switch space.SpaceType {
+		case consts.SPACE_PRIVATE:
+			if space.UserID != loginUser.ID {
+				common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+				return
+			}
+		case consts.SPACE_TEAM:
+			//团队空间，校验是否有权限
+			permissions := service.GetPermissionList(space, loginUser)
+			if len(permissions) == 0 {
+				common.BaseResponse(c, nil, "无权限", ecode.NO_AUTH_ERROR)
+				return
+			}
 		}
 	} else {
 		//公开图库
@@ -371,6 +382,20 @@ func ListPictureVOByPageWithCache(c *gin.Context) {
 	if err != nil {
 		common.BaseResponse(c, nil, err.Msg, err.Code)
 		return
+	}
+	//若是空间的图片，则需要获取权限
+	if len(pics.Records) != 0 {
+		var space *entity.Space
+		picVO := pics.Records[0]
+		if picVO.SpaceID != 0 {
+			space, _ = sSpace.GetSpaceById(picVO.SpaceID)
+		}
+		loginUser, _ := sUser.GetLoginUser(c)
+		PermissionList := service.GetPermissionList(space, loginUser)
+		//为每一个pic填充
+		for idx := range pics.Records {
+			pics.Records[idx].PermissionList = PermissionList
+		}
 	}
 	common.Success(c, *pics)
 }

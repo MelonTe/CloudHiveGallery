@@ -529,7 +529,10 @@ func (s *PictureService) ListPictureVOByPageWithCache(req *reqPicture.PictureQue
 	//缓存未击中，正常流程，并将结果放入缓存
 	v, err, _ := listGroup.Do(cacheKey, func() (interface{}, error) {
 		data, businessErr := s.ListPictureVOByPage(req)
-		return data, errors.New(businessErr.Msg)
+		if businessErr != nil {
+			return data, errors.New(businessErr.Msg)
+		}
+		return data, nil
 	})
 	if err != nil {
 		return nil, ecode.GetErrWithDetail(ecode.SYSTEM_ERROR, err.Error())
